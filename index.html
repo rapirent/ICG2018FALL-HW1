@@ -1,0 +1,70 @@
+<html>
+
+<head>
+<title>ICG WebGL &mdash; HW1</title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+<script type="text/javascript" src="js/gl-matrix-min.js"></script>
+<script type="text/javascript" src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
+
+<script id="fragmentShader" type="fragment">
+    precision mediump float;
+    uniform vec4 ambientProduct;
+    uniform vec4 diffuseProduct;
+    uniform vec4 specularProduct;
+    uniform float shininess;
+    varying vec3 N, L, E;
+    varying vec4 fragcolor;
+    void main(void) {
+        vec4 fColor;
+        vec3 H = normalize(L + E);
+        vec4 ambient = ambientProduct;
+        float Kd = max(dot(L, N), 0.0);
+        vec4 diffuse = Kd * diffuseProduct;
+        float Ks = pow(max(dot(N, H), 0.0), shininess);
+        vec4 specular = Ks * specularProduct;
+
+        if (dot(L, N)<0.0) {
+          specular = vec4(0.0, 0.0, 0.0, 1.0);
+        }
+        fColor = ambient + diffuse + specular;
+        fColor.a = 1.0;
+        gl_FragColor = fColor;
+    }
+</script>
+
+<script id="vertexShader" type="vertex">
+    attribute vec3 aVertexPosition;
+    attribute vec3 aVertexNormal;
+    attribute vec2 aTextureCoord;
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+    uniform vec4 lightPosition;
+    varying vec3 N, L, E;
+	  varying vec4 fragcolor;
+    uniform sampler2D uSampler;
+
+    void main(void) {
+      vec3 pos = -(uMVMatrix * vec4(aVertexPosition,1.0)).xyz;
+      vec3 light = lightPosition.xyz;
+      L = normalize(light - pos);
+      E = -pos;
+      N = normalize((uMVMatrix * vec4(aVertexNormal,1.0)).xyz);
+      gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+      vec4 fragmentColor;
+		  fragmentColor = texture2D(uSampler, vec2(aTextureCoord.s, aTextureCoord.t));
+		  fragcolor = vec4(fragmentColor.rgb, fragmentColor.a);;
+    }
+</script>
+
+
+<script type="text/javascript" src="js/main.js"></script>
+</head>
+
+
+<body>
+    <canvas id="canvas" style="border: none;" width="800" height="600"></canvas>
+    <br/>
+</body>
+
+</html>
