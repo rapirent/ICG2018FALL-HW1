@@ -5,30 +5,18 @@
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
 
 <script type="text/javascript" src="js/gl-matrix-min.js"></script>
-<script type="text/javascript" src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
-
+<script type="text/javascript" src="js/webgl-utils.js"></script>
+<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+<body>
+    <canvas id="canvas" style="border: none;" width="800" height="600"></canvas>
+    <br/>
+</body>
 <script id="fragmentShader" type="fragment">
+    #extension GL_OES_standard_derivatives:enable
     precision mediump float;
-    uniform vec4 ambientProduct;
-    uniform vec4 diffuseProduct;
-    uniform vec4 specularProduct;
-    uniform float shininess;
     varying vec3 N, L, E;
-    varying vec4 fragcolor;
+    varying vec4 fColor;
     void main(void) {
-        vec4 fColor;
-        vec3 H = normalize(L + E);
-        vec4 ambient = ambientProduct;
-        float Kd = max(dot(L, N), 0.0);
-        vec4 diffuse = Kd * diffuseProduct;
-        float Ks = pow(max(dot(N, H), 0.0), shininess);
-        vec4 specular = Ks * specularProduct;
-
-        if (dot(L, N)<0.0) {
-          specular = vec4(0.0, 0.0, 0.0, 1.0);
-        }
-        fColor = ambient + diffuse + specular;
-        fColor.a = 1.0;
         gl_FragColor = fColor;
     }
 </script>
@@ -41,30 +29,41 @@
     uniform mat4 uPMatrix;
     uniform vec4 lightPosition;
     varying vec3 N, L, E;
-	  varying vec4 fragcolor;
-    uniform sampler2D uSampler;
+    //uniform sampler2D uSampler;
 
+    uniform vec4 ambientWeight;
+    uniform vec4 diffuseWeight;
+    uniform vec4 specularWeight;
+    uniform vec4 ambient;
+    uniform vec4 diffuse;
+    uniform vec4 specular;
+    uniform float shininess;
+
+    varying vec4 fColor;
     void main(void) {
       vec3 pos = -(uMVMatrix * vec4(aVertexPosition,1.0)).xyz;
       vec3 light = lightPosition.xyz;
       L = normalize(light - pos);
       E = -pos;
       N = normalize((uMVMatrix * vec4(aVertexNormal,1.0)).xyz);
+
+
+      vec3 H = normalize(L + E);
+      vec4 ambient_product = ambient*ambientWeight;
+      float Kd = max(dot(L, N), 0.0);
+      vec4 diffuse_product = Kd * (diffuse*diffuseWeight);
+      float Ks = pow(max(dot(N, H), 0.0), shininess);
+      vec4 specular_product = Ks * (specular*specularWeight);
+
+      if (dot(L, N)<0.0) {
+          specular_product = vec4(0.0, 0.0, 0.0, 1.0);
+      }
+      fColor = ambient_product + diffuse_product + specular_product;
+      fColor.a = 1.0;
       gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-      vec4 fragmentColor;
-		  fragmentColor = texture2D(uSampler, vec2(aTextureCoord.s, aTextureCoord.t));
-		  fragcolor = vec4(fragmentColor.rgb, fragmentColor.a);;
     }
 </script>
-
-
 <script type="text/javascript" src="js/main.js"></script>
 </head>
-
-
-<body>
-    <canvas id="canvas" style="border: none;" width="800" height="600"></canvas>
-    <br/>
-</body>
 
 </html>
