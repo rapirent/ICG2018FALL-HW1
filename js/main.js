@@ -1,6 +1,5 @@
 "use strict";
 var gl;
-var buffers;
 
 var near = -10;
 var far = 10;
@@ -36,6 +35,7 @@ function initGL(canvas) {
 function getShader(gl, id) {
     var shaderScript = document.getElementById(id);
     if (!shaderScript) {
+        alert("can't find shader script")
         return null;
     }
 
@@ -69,8 +69,8 @@ function getShader(gl, id) {
 }
 
 function initShaders(shading) {
-  var fragmentShader = getShader(gl, "fragmentShader");
-  var vertexShader = getShader(gl, "vertexShader");
+  var fragmentShader = getShader(gl, shading + "fragmentShader");
+  var vertexShader = getShader(gl, shading + "vertexShader");
 
   var shaderProgram = gl.createProgram();
   gl.attachShader(shaderProgram, vertexShader);
@@ -91,8 +91,8 @@ function createLocations(selectedProgram) {
   selectedProgram.vertexPositionAttribute = gl.getAttribLocation(selectedProgram, "aVertexPosition");
   gl.enableVertexAttribArray(selectedProgram.vertexPositionAttribute);
 
-  // selectedProgram.vertexFrontColorAttribute = gl.getAttribLocation(selectedProgram, "aFrontColor");
-  // gl.enableVertexAttribArray(selectedProgram.vertexFrontColorAttribute);
+  selectedProgram.vertexFrontColorAttribute = gl.getAttribLocation(selectedProgram, "aFrontColor");
+  gl.enableVertexAttribArray(selectedProgram.vertexFrontColorAttribute);
 
   selectedProgram.vertexNormalAttribute = gl.getAttribLocation(selectedProgram, "aVertexNormal");
   gl.enableVertexAttribArray(selectedProgram.vertexNormalAttribute);
@@ -104,6 +104,7 @@ function createLocations(selectedProgram) {
   selectedProgram.mvMatrixUniform = gl.getUniformLocation(selectedProgram, "uMVMatrix");
   selectedProgram.samplerUniform = gl.getUniformLocation(selectedProgram, "uSampler");
   selectedProgram.lightPosition = gl.getUniformLocation(selectedProgram, "lightPosition");
+  shaderProgram.nMatrixUniform = gl.getUniformLocation(selectedProgram, "uNMatrix");
   //對應到ICG課本上的materialAmbient
   selectedProgram.ambientWeight = gl.getUniformLocation(selectedProgram, "uAmbientWeight");
   selectedProgram.diffuseWeight = gl.getUniformLocation(selectedProgram, "uDiffuseWeight");
@@ -115,7 +116,7 @@ function createLocations(selectedProgram) {
   // for specular
   selectedProgram.shininess = gl.getUniformLocation(selectedProgram, "uShininess")
 }
-function createBuffers(loadedData,selectedProgram) {
+function createBuffers(loadedData) {
   var normalBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(loadedData.vertexNormals), gl.STATIC_DRAW);
@@ -139,11 +140,20 @@ function createBuffers(loadedData,selectedProgram) {
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(loadedData.indices), gl.STATIC_DRAW);
   indexBuffer.itemSize = 1;
   indexBuffer.numItems = loadedData.indices.length;
+
+  var vertexFrontColorBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexFrontColorBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(loadedData.vertexFrontColors), gl.STATIC_DRAW);
+  vertexFrontColorBuffer.itemSize = 3;
+  vertexFrontColorBuffer.numItems = loadedData.vertexFrontColors.length / 3;
+
+
   return {
     normal: normalBuffer,
     textureCoord: textureCoordBuffer,
     position: positionBuffer,
-    index: indexBuffer
+    index: indexBuffer,
+    frontColor: vertexFrontColorBuffer
   };
 }
 
@@ -166,23 +176,22 @@ function updateMVMatrix() {
   mat4.translate(mvMatrix, mvMatrix, [0, 0, -40]);
   mat4.rotate(mvMatrix, mvMatrix, -degToRad(teapotAngle), [0, 1, 0]);
 }
-function updateAttributesAndUniforms(selectedProgram) {
+function updateAttributesAndUniforms(selectedProgram, buffers, texture) {
   createLocations(selectedProgram)
-  if (!buffers ||buffers.position == null ||
+  if (!buffers ||
+    buffers.position == null ||
     buffers.normal == null ||
     buffers.textureCoord == null ||
-    buffers.index == null) {
-    console.log('null')
+    buffers.index == null||
+    buffers.frontColor == null
+  ) {
+    console.log(buffers)
     return;
   }
   //TODO
-  // gl.activeTexture(gl.TEXTURE0);
-  // gl.bindTexture(gl.TEXTURE_2D, galvanizedTexture);
-  //updateMVMatrix();
-  mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
-  mat4.identity(mvMatrix);
-  mat4.translate(mvMatrix, mvMatrix, [0, 0, -40]);
-  mat4.rotate(mvMatrix, mvMatrix, -degToRad(teapotAngle), [0, 1, 0]);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  updateMVMatrix();
   //console.log(mvMatrix)
 
   gl.uniform1i(selectedProgram.samplerUniform, 0);
@@ -193,9 +202,11 @@ function updateAttributesAndUniforms(selectedProgram) {
   gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normal);
   gl.vertexAttribPointer(selectedProgram.vertexNormalAttribute, buffers.normal.itemSize, gl.FLOAT, false, 0, 0)
 
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffers.frontColor);
+  gl.vertexAttribPointer(selectedProgram.vertexFrontColor, buffers.frontColor.itemSize, gl.FLOAT, false, 0, 0);
 
-  // gl.bindBuffer(gl.ARRAY_BUFFER, buffers.textureCoord);
-  // gl.vertexAttribPointer(selectedProgram.textureCoordAttribute, buffers.textureCoord.itemSize, gl.FLOAT, false, 0, 0);
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffers.textureCoord);
+  gl.vertexAttribPointer(selectedProgram.textureCoordAttribute, buffers.textureCoord.itemSize, gl.FLOAT, false, 0, 0);
 
   gl.uniform4f(selectedProgram.ambientWeight, 1.0, 0.0, 1.0, 1.0 );
   gl.uniform4f(selectedProgram.diffuseWeight, 128/256,205/256,26/256, 1.0 );
@@ -205,10 +216,14 @@ function updateAttributesAndUniforms(selectedProgram) {
   gl.uniform4f(selectedProgram.specular, 1.0, 1.0, 1.0, 1.0 );
   gl.uniform4f(selectedProgram.lightPosition, 1.0, 2.0, 3.0, 0.0 );
   gl.uniform1f(selectedProgram.shininess, 100.0 );
-  gl.uniform1i(selectedProgram.samplerUniform, 0);
 
   gl.uniformMatrix4fv(selectedProgram.pMatrixUniform, false, pMatrix);
   gl.uniformMatrix4fv(selectedProgram.mvMatrixUniform, false, mvMatrix);
+  //課本6.8.3 N = (M^T)^(-1)
+  var normalMatrix = mat3.create();
+  mat4.toInverseMat3(mvMatrix, normalMatrix);
+  mat3.transpose(normalMatrix);
+  gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
   //gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.index);
   gl.drawElements(gl.TRIANGLES, buffers.index.numItems, gl.UNSIGNED_SHORT, 0);
@@ -224,17 +239,17 @@ function handleLoadedTexture(texture) {
   gl.generateMipmap(gl.TEXTURE_2D);
 
   gl.bindTexture(gl.TEXTURE_2D, null);
+  console.log('fuck')
 }
 
-var galvanizedTexture;
-
-function initTextures() {
-  galvanizedTexture = gl.createTexture();
-  galvanizedTexture.image = new Image();
-  galvanizedTexture.image.onload = function () {
-      handleLoadedTexture(galvanizedTexture)
+function initTextures(url) {
+  var texture = gl.createTexture();
+  texture.image = new Image();
+  texture.image.onload = function () {
+      handleLoadedTexture(texture)
   }
-  galvanizedTexture.image.src = "galvanizedTexture.jpg";
+  texture.image.src = url;
+  return texture
 }
 
 
@@ -248,12 +263,12 @@ function animate() {
     lastTime = timeNow;
 }
 
-function tick(selectedProgram) {
+function tick(selectedProgram,buffers,texture) {
     requestAnimationFrame(function(){
-      tick(selectedProgram)
+      tick(selectedProgram,buffers,texture)
     });
     setViewPort();
-    updateAttributesAndUniforms(selectedProgram);
+    updateAttributesAndUniforms(selectedProgram,buffers,texture);
     animate();
 }
 
@@ -275,20 +290,11 @@ function loadfile(url) {
   }).done(function(){
     return loadedData
   })
-  // var request = new XMLHttpRequest();
-  // request.open("GET", url);
-  // request.onreadystatechange = function () {
-  //     if (request.readyState == 4) {
-  //         buffers = createBuffers(JSON.parse(request.responseText));
-  //     }
-  // }
-  // request.send();
 }
 
 window.onload = function webGLStart() {
     // initTextures();
   initGL(document.getElementById("canvas"));
-  //loadTeapot("data/teapot.tri.json")
   function start(){
     return new Promise(function(resolve, reject) {
       var loadedData;
@@ -301,11 +307,23 @@ window.onload = function webGLStart() {
   }
   async function then() {
     var data = await start();
-    var selectedProgram = initShaders();
-    buffers = createBuffers(data,selectedProgram);
+    var selectedProgram = initShaders('flat-');
+    var texture = initTextures('galvanizedTexture.jpg')
+    console.log(texture)
+    var buffers = createBuffers(data);
     gl.clearColor(0.8, 0.5, 0.2, 1.0);
-    tick(selectedProgram)
+    tick(selectedProgram,buffers,texture)
   }
   then();
+
+  // $.getJSON("Teapot.json", function(json){
+  //   var buffers = createBuffers(json);
+  // }).done(function(json){
+  //   var selectedProgram = initShaders();
+  //   gl.clearColor(0.8, 0.5, 0.2, 1.0);
+  //   gl.enable(gl.DEPTH_TEST);
+
+  //   tick(selectedProgram)
+  // })
   //loadTeapot('data/mig27.tri.json')
 }

@@ -11,6 +11,33 @@
     <canvas id="canvas" style="border: none;" width="800" height="600"></canvas>
     <br/>
 </body>
+<script id="flat-fragmentShader" type="fragment">
+    precision mediump float;
+    uniform sampler2D uSampler;
+    varying vec2 vTextureCoord;
+    void main(void)
+    {
+        gl_FragColor =
+            texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+    }
+</script>
+
+<script id="flat-vertexShader" type="vertex">
+    attribute vec3 aVertexPosition;
+    attribute vec2 aTextureCoord;
+    attribute vec3 aFrontColor;
+    attribute vec3 aVertexNormal;
+
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+
+    varying vec2 vTextureCoord;
+    void main(void)
+    {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        vTextureCoord = aTextureCoord;
+    }
+</script>
 <script id="fragmentShader" type="fragment">
     #extension GL_OES_standard_derivatives:enable
     precision mediump float;
@@ -25,6 +52,7 @@
     attribute vec3 aVertexPosition;
     attribute vec3 aVertexNormal;
     attribute vec2 aTextureCoord;
+    attribute vec3 aFrontColor;
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
     uniform vec4 lightPosition;
@@ -41,6 +69,7 @@
 
     varying vec4 fColor;
     void main(void) {
+      vec3 tn = normalize(cross(dx, dy));
       vec3 pos = -(uMVMatrix * vec4(aVertexPosition,1.0)).xyz;
       vec3 light = lightPosition.xyz;
       L = normalize(light - pos);
