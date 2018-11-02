@@ -16,7 +16,6 @@ var bottom = -3.0;
 var eye;
 var at = vec3.fromValues(0.0, 0.0, 0.0);
 var up = vec3.fromValues(0.0, 1.0, 0.0);
-var selectedProgram;
 function initGL(canvas) {
   try {
     gl = canvas.getContext("webgl") || canvas.getContext('experimental-webgl');
@@ -37,7 +36,6 @@ function initGL(canvas) {
 function getShader(gl, id) {
     var shaderScript = document.getElementById(id);
     if (!shaderScript) {
-        console.log('fuck')
         return null;
     }
 
@@ -56,7 +54,6 @@ function getShader(gl, id) {
     } else if (shaderScript.type == "vertex") {
         shader = gl.createShader(gl.VERTEX_SHADER);
     } else {
-      console.log('fuck')
         return null;
     }
 
@@ -108,18 +105,17 @@ function createLocations(selectedProgram) {
   selectedProgram.samplerUniform = gl.getUniformLocation(selectedProgram, "uSampler");
   selectedProgram.lightPosition = gl.getUniformLocation(selectedProgram, "lightPosition");
   //對應到ICG課本上的materialAmbient
-  selectedProgram.ambientWeight = gl.getUniformLocation(selectedProgram, "ambientWeight");
-  selectedProgram.diffuseWeight = gl.getUniformLocation(selectedProgram, "diffuseWeight");
-  selectedProgram.specularWeight = gl.getUniformLocation(selectedProgram, "specularWeight");
+  selectedProgram.ambientWeight = gl.getUniformLocation(selectedProgram, "uAmbientWeight");
+  selectedProgram.diffuseWeight = gl.getUniformLocation(selectedProgram, "uDiffuseWeight");
+  selectedProgram.specularWeight = gl.getUniformLocation(selectedProgram, "uSpecularWeight");
 
-  selectedProgram.ambient = gl.getUniformLocation(selectedProgram, "ambient");
-  selectedProgram.diffuse = gl.getUniformLocation(selectedProgram, "diffuse");
-  selectedProgram.specular = gl.getUniformLocation(selectedProgram, "specular");
+  selectedProgram.ambient = gl.getUniformLocation(selectedProgram, "uAmbient");
+  selectedProgram.diffuse = gl.getUniformLocation(selectedProgram, "uDiffuse");
+  selectedProgram.specular = gl.getUniformLocation(selectedProgram, "uSpecular");
   // for specular
-  selectedProgram.shininess = gl.getUniformLocation(selectedProgram, "shininess")
+  selectedProgram.shininess = gl.getUniformLocation(selectedProgram, "uShininess")
 }
-
-function createBuffers(loadedData) {
+function createBuffers(loadedData,selectedProgram) {
   var normalBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(loadedData.vertexNormals), gl.STATIC_DRAW);
@@ -170,7 +166,8 @@ function updateMVMatrix() {
   mat4.translate(mvMatrix, mvMatrix, [0, 0, -40]);
   mat4.rotate(mvMatrix, mvMatrix, -degToRad(teapotAngle), [0, 1, 0]);
 }
-function updateAttributesAndUniforms() {
+function updateAttributesAndUniforms(selectedProgram) {
+  createLocations(selectedProgram)
   if (!buffers ||buffers.position == null ||
     buffers.normal == null ||
     buffers.textureCoord == null ||
@@ -178,7 +175,6 @@ function updateAttributesAndUniforms() {
     console.log('null')
     return;
   }
-  gl.useProgram(selectedProgram);
   //TODO
   // gl.activeTexture(gl.TEXTURE0);
   // gl.bindTexture(gl.TEXTURE_2D, galvanizedTexture);
@@ -196,47 +192,25 @@ function updateAttributesAndUniforms() {
 
   gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normal);
   gl.vertexAttribPointer(selectedProgram.vertexNormalAttribute, buffers.normal.itemSize, gl.FLOAT, false, 0, 0)
-  var lightPosition = vec4.fromValues(1.0, 1.0, 1.0, 0.0 );
-  var lightAmbient = vec4.fromValues(0.2, 0.2, 0.2, 1.0 );
-  var lightDiffuse = vec4.fromValues( 1.0, 1.0, 1.0, 1.0 );
-  var lightSpecular = vec4.fromValues( 1.0, 1.0, 1.0, 1.0 );
 
-  var materialAmbient = vec4.fromValues( 1.0, 0.0, 1.0, 1.0 );
-  var materialDiffuse = vec4.fromValues( 1.0, 0.8, 0.0, 1.0 );
-  var materialSpecular = vec4.fromValues( 1.0, 1.0, 1.0, 1.0 );
-  var materialShininess = 20.0;
-  var ambientProduct = vec4.create();vec4.mul(ambientProduct,lightAmbient, materialAmbient);
-  var diffuseProduct = vec4.create();vec4.mul(diffuseProduct,lightDiffuse, materialDiffuse);
-  var specularProduct = vec4.create();vec4.mul(specularProduct,lightSpecular, materialSpecular);
 
-  gl.uniform4fv( gl.getUniformLocation(program,
-    "ambientProduct"),flatten(ambientProduct) );
- gl.uniform4fv( gl.getUniformLocation(program,
-    "diffuseProduct"),flatten(diffuseProduct) );
- gl.uniform4fv( gl.getUniformLocation(program,
-    "specularProduct"),flatten(specularProduct) );
- gl.uniform4fv( gl.getUniformLocation(program,
-    "lightPosition"),flatten(lightPosition) );
- gl.uniform1f( gl.getUniformLocation(program,
-    "shininess"),materialShininess );
-  //gl.bindBuffer(gl.ARRAY_BUFFER, buffers.textureCoord);
-  //gl.vertexAttribPointer(selectedProgram.textureCoordAttribute, buffers.textureCoord.itemSize, gl.FLOAT, false, 0, 0);
+  // gl.bindBuffer(gl.ARRAY_BUFFER, buffers.textureCoord);
+  // gl.vertexAttribPointer(selectedProgram.textureCoordAttribute, buffers.textureCoord.itemSize, gl.FLOAT, false, 0, 0);
 
-  // gl.uniform4f(selectedProgram.ambientWeight, 1.0, 0.0, 1.0, 1.0 );
-  // gl.uniform4f(selectedProgram.diffuseWeight, 128/256,205/256,26/256, 1.0 );
-  // gl.uniform4f(selectedProgram.specularWeight, 1.0, 0.8, 0.0, 1.0 );
-  // gl.uniform4f(selectedProgram.ambient, 0.2, 0.2, 0.2, 1.0 );
-  // gl.uniform4f(selectedProgram.diffuse, 0.5, 0.5, 0.5, 1.0 );
-  // gl.uniform4f(selectedProgram.specular, 1.0, 1.0, 1.0, 1.0 );
-  // gl.uniform4f(selectedProgram.lightPosition, 1.0, 2.0, 3.0, 0.0 );
-  // gl.uniform1f(selectedProgram.shininess, 100.0 );
-  // gl.uniform1i(selectedProgram.samplerUniform, 0);
+  gl.uniform4f(selectedProgram.ambientWeight, 1.0, 0.0, 1.0, 1.0 );
+  gl.uniform4f(selectedProgram.diffuseWeight, 128/256,205/256,26/256, 1.0 );
+  gl.uniform4f(selectedProgram.specularWeight, 1.0, 0.8, 0.0, 1.0 );
+  gl.uniform4f(selectedProgram.ambient, 0.2, 0.2, 0.2, 1.0 );
+  gl.uniform4f(selectedProgram.diffuse, 0.5, 0.5, 0.5, 1.0 );
+  gl.uniform4f(selectedProgram.specular, 1.0, 1.0, 1.0, 1.0 );
+  gl.uniform4f(selectedProgram.lightPosition, 1.0, 2.0, 3.0, 0.0 );
+  gl.uniform1f(selectedProgram.shininess, 100.0 );
+  gl.uniform1i(selectedProgram.samplerUniform, 0);
 
   gl.uniformMatrix4fv(selectedProgram.pMatrixUniform, false, pMatrix);
   gl.uniformMatrix4fv(selectedProgram.mvMatrixUniform, false, mvMatrix);
   //gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.index);
-  console.log(buffers)
   gl.drawElements(gl.TRIANGLES, buffers.index.numItems, gl.UNSIGNED_SHORT, 0);
 
 }
@@ -274,36 +248,64 @@ function animate() {
     lastTime = timeNow;
 }
 
-function tick() {
-    requestAnimationFrame(tick);
+function tick(selectedProgram) {
+    requestAnimationFrame(function(){
+      tick(selectedProgram)
+    });
     setViewPort();
-    updateAttributesAndUniforms();
+    updateAttributesAndUniforms(selectedProgram);
     animate();
 }
 
-function loadTeapot(url) {
+function loadFile(file_path) {
   var request = new XMLHttpRequest();
-  request.open("GET", url);
-  request.onreadystatechange = function () {
-      if (request.readyState == 4) {
-          buffers = createBuffers(JSON.parse(request.responseText));
-      }
+  request.open("GET", file_path, false);
+  request.send(null);
+  if (request.status === 200) {
+      // console.log(request.responseText);
+      return request.responseText;
   }
-  request.send();
+  return "";
+}
+
+function loadfile(url) {
+  var loadedData;
+  $.get( url, function( data ) {
+    loadedData = $.parseJSON(JSON.stringify(data))
+  }).done(function(){
+    return loadedData
+  })
+  // var request = new XMLHttpRequest();
+  // request.open("GET", url);
+  // request.onreadystatechange = function () {
+  //     if (request.readyState == 4) {
+  //         buffers = createBuffers(JSON.parse(request.responseText));
+  //     }
+  // }
+  // request.send();
 }
 
 window.onload = function webGLStart() {
     // initTextures();
   initGL(document.getElementById("canvas"));
   //loadTeapot("data/teapot.tri.json")
-  $.getJSON("Teapot.json", function(json){
-    selectedProgram = initShaders();
-  }).done(function(json){
-    buffers = createBuffers(json);
+  function start(){
+    return new Promise(function(resolve, reject) {
+      var loadedData;
+      $.get( "data/mig27.tri.json", function( data ) {
+        loadedData = $.parseJSON(JSON.stringify(data))
+      }).done(function(){
+        resolve(loadedData);
+      })
+    })
+  }
+  async function then() {
+    var data = await start();
+    var selectedProgram = initShaders();
+    buffers = createBuffers(data,selectedProgram);
     gl.clearColor(0.8, 0.5, 0.2, 1.0);
-    gl.enable(gl.DEPTH_TEST);
-
-    tick()
-  })
+    tick(selectedProgram)
+  }
+  then();
   //loadTeapot('data/mig27.tri.json')
 }

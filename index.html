@@ -31,13 +31,13 @@
     varying vec3 N, L, E;
     //uniform sampler2D uSampler;
 
-    uniform vec4 ambientWeight;
-    uniform vec4 diffuseWeight;
-    uniform vec4 specularWeight;
-    uniform vec4 ambient;
-    uniform vec4 diffuse;
-    uniform vec4 specular;
-    uniform float shininess;
+    uniform vec4 uAmbientWeight;
+    uniform vec4 uDiffuseWeight;
+    uniform vec4 uSpecularWeight;
+    uniform vec4 uAmbient;
+    uniform vec4 uDiffuse;
+    uniform vec4 uSpecular;
+    uniform float uShininess;
 
     varying vec4 fColor;
     void main(void) {
@@ -49,11 +49,11 @@
 
 
       vec3 H = normalize(L + E);
-      vec4 ambient_product = ambient*ambientWeight;
+      vec4 ambient_product = uAmbient*uAmbientWeight;
       float Kd = max(dot(L, N), 0.0);
-      vec4 diffuse_product = Kd * (diffuse*diffuseWeight);
-      float Ks = pow(max(dot(N, H), 0.0), shininess);
-      vec4 specular_product = Ks * (specular*specularWeight);
+      vec4 diffuse_product = Kd * (uDiffuse*uDiffuseWeight);
+      float Ks = pow(max(dot(N, H), 0.0), uShininess);
+      vec4 specular_product = Ks * (uSpecular*uSpecularWeight);
 
       if (dot(L, N)<0.0) {
           specular_product = vec4(0.0, 0.0, 0.0, 1.0);
