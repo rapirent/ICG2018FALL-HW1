@@ -102,11 +102,19 @@ function initSetting() {
     xAngle: 0,
     yAngle: 180
   }
-  scaleFactor = {
+  scaleFactor = [{
     xFactor: 1,
     yFactor: 1,
     zFactor: 1
-  }
+  },{
+    xFactor: 1,
+    yFactor: 1,
+    zFactor: 1
+  },{
+    xFactor: 1,
+    yFactor: 1,
+    zFactor: 1
+  }]
 }
 function initGL(canvas) {
   try {
@@ -301,7 +309,7 @@ function updateMVMatrix(number) {
   mat4.scale(
     mvMatrix,
     mvMatrix,
-    [scaleFactor.xFactor,scaleFactor.yFactor, scaleFactor.zFactor]
+    [scaleFactor[number].xFactor,scaleFactor[number].yFactor, scaleFactor[number].zFactor]
   );
 
   mat4.translate(
@@ -544,9 +552,9 @@ function handleMouseMove(event) {
   mat4.identity(newRotationMatrix);
 
   var deltaX = newX - lastMouseX;
-  mat4.rotateX(newRotationMatrix, newRotationMatrix, degToRad(deltaX / 10));
+  mat4.rotateY(newRotationMatrix, newRotationMatrix, degToRad(deltaX / 10));
   var deltaY = newY - lastMouseY;
-  mat4.rotateY(newRotationMatrix, newRotationMatrix, degToRad(deltaY / 10));
+  mat4.rotateX(newRotationMatrix, newRotationMatrix, degToRad(deltaY / 10));
 
   mat4.multiply(canvasRotationMatrix, newRotationMatrix, canvasRotationMatrix);
   lastMouseX = newX;
@@ -638,7 +646,74 @@ async function handelKeyEvent(event) {
         }
       }
     }
-
+    if (currentlyPressedKeys[82]) {
+      //r
+      for (var i = 0; i<3; i++) {
+        if (selectSetting[i]) {
+          scaleFactor[i].xFactor -= 0.1;
+        }
+      }
+    }
+    if (currentlyPressedKeys[70]) {
+      //f
+      for (var i = 0; i<3; i++) {
+        if (selectSetting[i]) {
+          scaleFactor[i].yFactor -= 0.1;
+        }
+      }
+    }
+    if (currentlyPressedKeys[86]) {
+      //v
+      for (var i = 0; i<3; i++) {
+        if (selectSetting[i]) {
+          scaleFactor[i].zFactor -= 0.1;
+        }
+      }
+    }
+    if (currentlyPressedKeys[84]) {
+      //t
+      for (var i = 0; i<3; i++) {
+        if (selectSetting[i]) {
+          scaleFactor[i].xFactor += 0.1;
+        }
+      }
+    }
+    if (currentlyPressedKeys[71]) {
+      //g
+      for (var i = 0; i<3; i++) {
+        if (selectSetting[i]) {
+          scaleFactor[i].yFactor += 0.1;
+        }
+      }
+    }
+    if (currentlyPressedKeys[66]) {
+      //g
+      for (var i = 0; i<3; i++) {
+        if (selectSetting[i]) {
+          scaleFactor[i].zFactor += 0.1;
+        }
+      }
+    }
+    if (currentlyPressedKeys[219]) {
+      //[
+      for (var i = 0; i<3; i++) {
+        if (selectSetting[i]) {
+          scaleFactor[i].xFactor -= 0.1;
+          scaleFactor[i].yFactor -= 0.1;
+          scaleFactor[i].zFactor -= 0.1;
+        }
+      }
+    }
+    if (currentlyPressedKeys[221]) {
+      //]
+      for (var i = 0; i<3; i++) {
+        if (selectSetting[i]) {
+          scaleFactor[i].xFactor += 0.1;
+          scaleFactor[i].yFactor += 0.1;
+          scaleFactor[i].zFactor += 0.1;
+        }
+      }
+    }
     resolve()
   })
 }
@@ -662,6 +737,9 @@ async function then() {
     data3 = await start('data/'+ $('#object3').val() + '.json');
   var datas = [data1,data2,data3];
   var texture = initTextures($('#texture').val())
+  if ($('#texture').val()=='frontcolor') {
+    useTextureSetting = [false, false, false]
+  }
   var shaders = [
     initShaders('flat-'),
     initShaders('gouraud-'),
@@ -783,9 +861,6 @@ $('.checkbox.light').checkbox().checkbox({
   }
 })
 $('.checkbox.object').checkbox().checkbox({
-  onChanged: function() {
-    console.log('fuck')
-  },
   onChecked: function() {
     console.log(parseInt($(this).attr('id')) - 1)
     selectSetting[parseInt($(this).attr('id')) - 1] = true
