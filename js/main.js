@@ -281,8 +281,17 @@ function updateAttributesAndUniforms(selectedProgram, buffers, texture,i) {
     Math.round(pickers.lightColorAmbient.rgb[1])/256,
     Math.round(pickers.lightColorAmbient.rgb[2])/256
   );
-  gl.uniform3f(selectedProgram.diffuse, 1, 1, 1 );
-  gl.uniform3f(selectedProgram.specular, 1, 1, 1 );
+  gl.uniform3f(selectedProgram.diffuse,
+    Math.round(pickers.lightColorDiffuse.rgb[0])/256,
+    Math.round(pickers.lightColorDiffuse.rgb[1])/256,
+    Math.round(pickers.lightColorDiffuse.rgb[2])/256
+  );
+  gl.uniform3f(selectedProgram.specular,
+    Math.round(pickers.lightColorSpecular.rgb[0])/256,
+    Math.round(pickers.lightColorSpecular.rgb[1])/256,
+    Math.round(pickers.lightColorSpecular.rgb[2])/256
+  )
+  //gl.uniform3f(selectedProgram.specular, 1, 1, 1 );
   gl.uniform4f(selectedProgram.lightPosition, -10.0, 4.0, 20.0, 1.0 );
 
 
@@ -473,9 +482,17 @@ async function handelKeyEvent(event) {
 window.onload = function webGLStart() {
     // initTextures();
   pickers.lightColorAmbient = new jscolor('lightColorAmbient-button', options);
-  pickers.lightColorAmbient.onFineChange = "update('lightColorAmbient')";
+  pickers.lightColorAmbient.onFineChange = "updateColorPanel('lightColorAmbient')";
   pickers.lightColorAmbient.fromString('AB2567');
-  update('lightColorAmbient');
+  pickers.lightColorDiffuse = new jscolor('lightColorDiffuse-button', options);
+  pickers.lightColorDiffuse.onFineChange = "updateColorPanel('lightColorDiffuse')";
+  pickers.lightColorDiffuse.fromString('AB2567');
+  pickers.lightColorSpecular = new jscolor('lightColorSpecular-button', options);
+  pickers.lightColorSpecular.onFineChange = "updateColorPanel('lightColorSpecular')";
+  pickers.lightColorSpecular.fromString('AB2567');
+  updateColorPanel('lightColorAmbient');
+  updateColorPanel('lightColorDiffuse');
+  updateColorPanel('lightColorSpecular');
   var canvas = $('#canvas')
   initGL(canvas[0]);
   //keyboard
@@ -549,7 +566,7 @@ var options = {
 
 var pickers = {};
 
-function update (id) {
+function updateColorPanel (id) {
   document.getElementById(id + '-rgb').value = pickers[id].toRGBString();
   document.getElementById(id + '-hex').value = pickers[id].toHEXString();
   document.getElementById(id + '-red').value = Math.round(pickers[id].rgb[0]);
@@ -559,17 +576,17 @@ function update (id) {
 
 function setHSV (id, h, s, v) {
   pickers[id].fromHSV(h, s, v);
-  update(id);
+  updateColorPanel(id);
 }
 
 function setRGB (id, r, g, b) {
   pickers[id].fromRGB(r, g, b);
-  update(id);
+  updateColorPanel(id);
 }
 
 function setString (id, str) {
   pickers[id].fromString(str);
-  update(id);
+  updateColorPanel(id);
 }
 function hexToRgbA(hex){
   var c;
