@@ -24,13 +24,14 @@ var gl;
 function updateRenderer() {
   console.log('stop')
   cancelAnimationFrame(animRequest)
+  initSetting();
   then();
 }
 
 var transFactors = [{
     xFactor: -40,
     yFactor: 5,
-    zFactor: 0,
+    zFactor: -20,
   },{
     xFactor: 0,
     yFactor: 5,
@@ -38,8 +39,9 @@ var transFactors = [{
   },{
     xFactor: 40,
     yFactor: 5,
-    zFactor: 0,
+    zFactor: -20,
 }]
+var selectSetting = [true, true, true]
 // var transFactors = [{
 //   xFactor: -20,
 //   yFactor: 0,
@@ -79,6 +81,33 @@ var scaleFactor = {
   zFactor: 1
 }
 var isLightShow = [true, true, true]
+function initSetting() {
+  transFactors = [{
+    xFactor: -40,
+    yFactor: 5,
+    zFactor: -20,
+  },{
+    xFactor: 0,
+    yFactor: 5,
+    zFactor: 0,
+  },{
+    xFactor: 40,
+    yFactor: 5,
+    zFactor: -20,
+  }]
+  shearFactor = [{xFactor: 0,yFactor: 0, zFactor: 0,},{xFactor: 0,yFactor: 0,zFactor: 0,},{xFactor: 0,yFactor: 0,zFactor: 0,}]
+  animateSetting = {
+    xSpeed: 0,
+    ySpeed: 1,
+    xAngle: 0,
+    yAngle: 180
+  }
+  scaleFactor = {
+    xFactor: 1,
+    yFactor: 1,
+    zFactor: 1
+  }
+}
 function initGL(canvas) {
   try {
     gl = canvas.getContext("webgl") || canvas.getContext('experimental-webgl');
@@ -545,6 +574,71 @@ async function handelKeyEvent(event) {
     if (currentlyPressedKeys[40]) {
       animateSetting.xSpeed += 1;
     }
+    if (currentlyPressedKeys[81]) {
+      //q
+      for (var i = 0; i<3; i++) {
+        if (selectSetting[i]) {
+          transFactors[i].zFactor += 1;
+        }
+      }
+    }
+    if (currentlyPressedKeys[90]) {
+      //z
+      for (var i = 0; i<3; i++) {
+        if (selectSetting[i]) {
+          transFactors[i].zFactor -= 1;
+        }
+      }
+    }
+    if (currentlyPressedKeys[68]) {
+      //d
+      for (var i = 0; i<3; i++) {
+        if (selectSetting[i]) {
+          transFactors[i].xFactor += 1;
+        }
+      }
+    }
+    if (currentlyPressedKeys[65]) {
+      //a
+      for (var i = 0; i<3; i++) {
+        if (selectSetting[i]) {
+          transFactors[i].xFactor -= 1;
+        }
+      }
+    }
+    if (currentlyPressedKeys[87]) {
+      //w
+      for (var i = 0; i<3; i++) {
+        if (selectSetting[i]) {
+          transFactors[i].yFactor += 1;
+        }
+      }
+    }
+    if (currentlyPressedKeys[83]) {
+      //s
+      for (var i = 0; i<3; i++) {
+        if (selectSetting[i]) {
+          transFactors[i].yFactor -= 1;
+        }
+      }
+    }
+    if (currentlyPressedKeys[69]) {
+      //e
+      for (var i = 0; i<3; i++) {
+        if (selectSetting[i]) {
+          shearFactor[i].xFactor += 0.1;
+        }
+      }
+    }
+    if (currentlyPressedKeys[67]) {
+      //e
+      for (var i = 0; i<3; i++) {
+        if (selectSetting[i]) {
+          shearFactor[i].xFactor -= 0.1;
+        }
+      }
+    }
+
     resolve()
   })
 }
@@ -567,7 +661,7 @@ async function then() {
     data2 = await start('data/'+ $('#object2').val() + '.json'),
     data3 = await start('data/'+ $('#object3').val() + '.json');
   var datas = [data1,data2,data3];
-  var texture = initTextures('galvanizedTexture.jpg')
+  var texture = initTextures($('#texture').val())
   var shaders = [
     initShaders('flat-'),
     initShaders('gouraud-'),
@@ -624,8 +718,10 @@ window.onload = function webGLStart() {
     .on("keypress", function(event) {
       var pressKey = event.keyCode|| event.which;
       if (pressKey == 13) {
+        console.log(startAnimate)
         startAnimate = !startAnimate;
       }})
+  initSetting();
   then();
 }
 
@@ -677,11 +773,26 @@ function hexToRgbA(hex){
   throw new Error('Bad Hex');
 }
 $('.ui.dropdown').dropdown();
-// $('.checkbox').checkbox().checkbox({
-//   onChecked: function() {
-//     isLightShow[int($(this).attr('id')) - 1] = true
-//   },
-//   onUnchecked: function() {
-//     isLightShow[int($(this).attr('id')) - 1] = false
-//   }
-// })
+$('.checkbox.light').checkbox().checkbox({
+  onChecked: function() {
+    console.log(parseInt($(this).attr('id')) - 1)
+    isLightShow[parseInt($(this).attr('id')) - 1] = true
+  },
+  onUnchecked: function() {
+    isLightShow[parseInt($(this).attr('id')) - 1] = false
+  }
+})
+$('.checkbox.object').checkbox().checkbox({
+  onChanged: function() {
+    console.log('fuck')
+  },
+  onChecked: function() {
+    console.log(parseInt($(this).attr('id')) - 1)
+    selectSetting[parseInt($(this).attr('id')) - 1] = true
+    console.log(selectSetting)
+  },
+  onUnchecked: function() {
+    selectSetting[parseInt($(this).attr('id')) - 1] = false
+    console.log(selectSetting)
+  }
+})

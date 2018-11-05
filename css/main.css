@@ -18,4 +18,9 @@
   Display: table;
 
 }
+#noshadow {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  border: none;
+}
 

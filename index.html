@@ -11,50 +11,85 @@
 <script type="text/javascript" src="js/semantic.min.js"></script>
 <script type="text/javascript" src="js/jscolor.js"></script>
 <body>
-    <canvas id="canvas" style="border: none;" width="1300" height="600"></canvas>
+    <canvas id="canvas" style="border: none;" width="1300" height="400"></canvas>
     <div class="render block">
       <div class="panel">
-        <a class="ui primary button" onclick="updateRenderer()">Re-Render</a>
-        <div class="ui dropdown">
-          <input type="hidden" value="Mig27" id="object1">
-          <i class="dropdown icon"></i>
-          <div class="default text">select #1 object</div>
-          <div class="menu">
-            <div class="item" data-value="csie.tri">csie</div>
-            <div class="item" data-value="Mig27">Mig27</div>
-            <div class="item" data-value="Teapot">Teapot</div>
-            <div class="item" data-value="tomcat.tri">Tomcat</div>
-            <div class="item" data-value="kangaroo.tri">Kangaroo</div>
-            <div class="item" data-value="easter.tri">Easter</div>
-            <div class="item" data-value="pot.tri">teapot (with color)</div>
+        <div class="ui horizontal segments" id="noshadow">
+          <div class="ui segment" id="noshadow">
+            <div class="ui buttons">
+              <a class="ui primary button" onclick="updateRenderer()" style="position: relative;">Re-Render</a>
+              <div class="or" data-text="AS"></div>
+              <div class="ui dropdown button" style="position: relative;">
+                <input type="hidden" value="galvanizedTexture.jpg" id="texture">
+                <i class="dropdown icon"></i>
+                <div class="default text">select render texture</div>
+                <div class="menu">
+                  <div class="item" data-value="galvanizedTexture.jpg">galvanizedTexture</div>
+                  <div class="item" data-value="moon.gif">moon</div>
+                  <div class="item" data-value="red.jpg">red</div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="ui dropdown">
-          <input type="hidden" value="Teapot" id="object2">
-          <i class="dropdown icon"></i>
-          <div class="default text">select #2 object</div>
-          <div class="menu">
-            <div class="item" data-value="csie.tri">csie</div>
-            <div class="item" data-value="Mig27">Mig27</div>
-            <div class="item" data-value="Teapot">Teapot</div>
-            <div class="item" data-value="tomcat.tri">Tomcat</div>
-            <div class="item" data-value="kangaroo.tri">Kangaroo</div>
-            <div class="item" data-value="easter.tri">Easter</div>
-            <div class="item" data-value="pot.tri">teapot (with color)</div>
+          <div class="ui segment">
+            <div class="ui checkbox object">
+              <input type="checkbox" checked id="1">
+              <label>Object #1: </label>
+            </div>
+            <div class="ui dropdown" style="position: relative;">
+              <input type="hidden" value="Mig27" id="object1">
+              <i class="dropdown icon"></i>
+              <div class="default text">select #1 object</div>
+              <div class="menu">
+                <div class="item" data-value="csie.tri">csie</div>
+                <div class="item" data-value="Mig27">Mig27</div>
+                <div class="item" data-value="Teapot">Teapot</div>
+                <div class="item" data-value="tomcat.tri">Tomcat</div>
+                <div class="item" data-value="kangaroo.tri">Kangaroo</div>
+                <div class="item" data-value="easter.tri">Easter</div>
+                <div class="item" data-value="pot.tri">teapot (with color)</div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="ui dropdown">
-          <input type="hidden" value="easter.tri" id="object3">
-          <i class="dropdown icon"></i>
-          <div class="default text">select #3 object</div>
-          <div class="menu">
-            <div class="item" data-value="csie.tri">csie</div>
-            <div class="item" data-value="Mig27">Mig27</div>
-            <div class="item" data-value="Teapot">Teapot</div>
-            <div class="item" data-value="tomcat.tri">Tomcat</div>
-            <div class="item" data-value="kangaroo.tri">Kangaroo</div>
-            <div class="item" data-value="easter.tri">Easter</div>
-            <div class="item" data-value="pot.tri">teapot (with color)</div>
+          <div class="ui segment">
+            <div class="ui checkbox object">
+              <input type="checkbox" checked id="2">
+              <label>Object #2: </label>
+            </div>
+            <div class="ui dropdown" style="position: relative;">
+              <input type="hidden" value="Teapot" id="object2">
+              <i class="dropdown icon"></i>
+              <div class="default text">select #2 object</div>
+              <div class="menu">
+                <div class="item" data-value="csie.tri">csie</div>
+                <div class="item" data-value="Mig27">Mig27</div>
+                <div class="item" data-value="Teapot">Teapot</div>
+                <div class="item" data-value="tomcat.tri">Tomcat</div>
+                <div class="item" data-value="kangaroo.tri">Kangaroo</div>
+                <div class="item" data-value="easter.tri">Easter</div>
+                <div class="item" data-value="pot.tri">teapot (with color)</div>
+              </div>
+            </div>
+          </div>
+          <div class="ui segment">
+            <div class="ui checkbox object">
+              <input type="checkbox" checked id="3">
+              <label>Object #3: </label>
+            </div>
+            <div class="ui dropdown" style="position: relative;">
+              <input type="hidden" value="easter.tri" id="object3">
+              <i class="dropdown icon"></i>
+              <div class="default text">select #3 object</div>
+              <div class="menu">
+                <div class="item" data-value="csie.tri">csie</div>
+                <div class="item" data-value="Mig27">Mig27</div>
+                <div class="item" data-value="Teapot">Teapot</div>
+                <div class="item" data-value="tomcat.tri">Tomcat</div>
+                <div class="item" data-value="kangaroo.tri">Kangaroo</div>
+                <div class="item" data-value="easter.tri">Easter</div>
+                <div class="item" data-value="pot.tri">teapot (with color)</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -93,8 +128,8 @@
       </div>
       <div class="ui segment panel">
         <div class="lightchoose">
-          <div class="ui checkbox">
-            <input type="checkbox" name="example">
+          <div class="ui checkbox light">
+            <input type="checkbox" checked id="1">
             <label>Main Light</label>
           </div>
           <div class="ui input">
@@ -109,8 +144,8 @@
         </div>
         <div class="ui divider"></div>
           <div class="lightchoose">
-            <div class="ui checkbox">
-              <input type="checkbox" value="example">
+            <div class="ui checkbox light">
+              <input type="checkbox" checked id="2">
               <label>Fill Light</label>
             </div>
             <div class="ui input">
@@ -125,12 +160,12 @@
           </div>
         <div class="ui divider"></div>
           <div class="lightchoose">
-            <div class="ui checkbox">
-              <input type="checkbox" checked value="1" id="light3">
+            <div class="ui checkbox light">
+              <input type="checkbox" checked id="3">
               <label>Back Light</label>
             </div>
             <div class="ui input">
-              <input type="text" value="100" placeholder="100" id="light3x">
+              <input type="text"  value="100" placeholder="100" id="light3x">
             </div>
             <div class="ui input">
               <input type="text" value="40" placeholder="40" id="light3y">
