@@ -3,21 +3,66 @@
 <head>
 <title>ICG WebGL &mdash; HW1</title>
 <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
-<link rel="stylesheet" href="css/jquery-ui.min.css">
-<link rel="stylesheet" href="css/jquery-ui.structure.min.css">
-<link rel="stylesheet" href="css/jquery-ui.theme.min.css">
+<link rel="stylesheet" href="css/semantic.min.css">
 <link rel="stylesheet" href="css/main.css">
 <script type="text/javascript" src="js/gl-matrix-min.js"></script>
 <script type="text/javascript" src="js/webgl-utils.js"></script>
 <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
-<script type="text/javascript" src="js/jquery-ui.min.js"></script>
+<script type="text/javascript" src="js/semantic.min.js"></script>
 <script type="text/javascript" src="js/jscolor.js"></script>
 <body>
     <canvas id="canvas" style="border: none;" width="1300" height="600"></canvas>
-    <br/>
-    <div class="lightColor">
+    <div class="render block">
+      <div class="panel">
+        <a class="ui primary button" onclick="updateRenderer()">Re-Render</a>
+        <div class="ui dropdown">
+          <input type="hidden" value="Mig27" id="object1">
+          <i class="dropdown icon"></i>
+          <div class="default text">select #1 object</div>
+          <div class="menu">
+            <div class="item" data-value="csie.tri">csie</div>
+            <div class="item" data-value="Mig27">Mig27</div>
+            <div class="item" data-value="Teapot">Teapot</div>
+            <div class="item" data-value="tomcat.tri">Tomcat</div>
+            <div class="item" data-value="kangaroo.tri">Kangaroo</div>
+            <div class="item" data-value="easter.tri">Easter</div>
+            <div class="item" data-value="pot.tri">teapot (with color)</div>
+          </div>
+        </div>
+        <div class="ui dropdown">
+          <input type="hidden" value="Teapot" id="object2">
+          <i class="dropdown icon"></i>
+          <div class="default text">select #2 object</div>
+          <div class="menu">
+            <div class="item" data-value="csie.tri">csie</div>
+            <div class="item" data-value="Mig27">Mig27</div>
+            <div class="item" data-value="Teapot">Teapot</div>
+            <div class="item" data-value="tomcat.tri">Tomcat</div>
+            <div class="item" data-value="kangaroo.tri">Kangaroo</div>
+            <div class="item" data-value="easter.tri">Easter</div>
+            <div class="item" data-value="pot.tri">teapot (with color)</div>
+          </div>
+        </div>
+        <div class="ui dropdown">
+          <input type="hidden" value="easter.tri" id="object3">
+          <i class="dropdown icon"></i>
+          <div class="default text">select #3 object</div>
+          <div class="menu">
+            <div class="item" data-value="csie.tri">csie</div>
+            <div class="item" data-value="Mig27">Mig27</div>
+            <div class="item" data-value="Teapot">Teapot</div>
+            <div class="item" data-value="tomcat.tri">Tomcat</div>
+            <div class="item" data-value="kangaroo.tri">Kangaroo</div>
+            <div class="item" data-value="easter.tri">Easter</div>
+            <div class="item" data-value="pot.tri">teapot (with color)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ui divider"></div>
+    <div class="lightColor block">
       <div class="panel lightColorAmbient">
-        <button id="lightColorAmbient-button">abmient light color</button>
+        <button class="ui button" id="lightColorAmbient-button">abmient light color</button>
         <table>
           <tr><th>RGB</th><td><input id="lightColorAmbient-rgb" onchange="setString('lightColorAmbient', this.value)" /></td></tr>
           <tr><th>HEX</th><td><input id="lightColorAmbient-hex" onchange="setString('lightColorAmbient', this.value)" /></td></tr>
@@ -27,7 +72,7 @@
         </table>
       </div>
       <div class="panel lightColorDiffuse">
-        <button id="lightColorDiffuse-button">diffse light color</button>
+        <button class="ui button" id="lightColorDiffuse-button">diffse light color</button>
         <table>
           <tr><th>RGB</th><td><input id="lightColorDiffuse-rgb" onchange="setString('lightColorDiffuse', this.value)" /></td></tr>
           <tr><th>HEX</th><td><input id="lightColorDiffuse-hex" onchange="setString('lightColorDiffuse', this.value)" /></td></tr>
@@ -37,7 +82,7 @@
         </table>
       </div>
       <div class="panel lightColorSpecular">
-        <button id="lightColorSpecular-button">Specular light color</button>
+        <button class="ui button" id="lightColorSpecular-button">Specular light color</button>
         <table>
           <tr><th>RGB</th><td><input id="lightColorSpecular-rgb" onchange="setString('lightColorSpecular', this.value)" /></td></tr>
           <tr><th>HEX</th><td><input id="lightColorSpecular-hex" onchange="setString('lightColorSpecular', this.value)" /></td></tr>
@@ -46,20 +91,70 @@
           <tr class="blu"><th>B</th><td><input id="lightColorSpecular-blu" class="short" onchange="setRGB('lightColorSpecular', null, null, this.value)" /></td></tr>
         </table>
       </div>
+      <div class="ui segment panel">
+        <div class="lightchoose">
+          <div class="ui checkbox">
+            <input type="checkbox" name="example">
+            <label>Main Light</label>
+          </div>
+          <div class="ui input">
+            <input type="text" value="-10" placeholder="-10" id="light1x">
+          </div>
+          <div class="ui input">
+            <input type="text" value="4" placeholder="4" id="light1y">
+          </div>
+          <div class="ui input">
+            <input type="text" value="-20" placeholder="-20" id="light1z">
+          </div>
+        </div>
+        <div class="ui divider"></div>
+          <div class="lightchoose">
+            <div class="ui checkbox">
+              <input type="checkbox" value="example">
+              <label>Fill Light</label>
+            </div>
+            <div class="ui input">
+              <input type="text" value="90" placeholder="90" id="light2x">
+            </div>
+            <div class="ui input">
+              <input type="text" value="-80" placeholder="80" id="light2y">
+            </div>
+            <div class="ui input">
+              <input type="text" value="-60" placeholder="-60" id="light2z">
+            </div>
+          </div>
+        <div class="ui divider"></div>
+          <div class="lightchoose">
+            <div class="ui checkbox">
+              <input type="checkbox" checked value="1" id="light3">
+              <label>Back Light</label>
+            </div>
+            <div class="ui input">
+              <input type="text" value="100" placeholder="100" id="light3x">
+            </div>
+            <div class="ui input">
+              <input type="text" value="40" placeholder="40" id="light3y">
+            </div>
+            <div class="ui input">
+              <input type="text" value="-200" placeholder="-200" id="light3z">
+            </div>
+          </div>
+      </div>
     </div>
-    <div class="materialColor">
-      <div class="panel materialColorAmbient">
-        <button id="materialColorAmbient-button">abmient material color</button>
+    <div class="ui divider"></div>
+    <div class="materialColor block">
+      <div class="panel materialAmbient">
+        <button class="ui button" id="materialAmbient-button">abmient material color</button>
         <table>
-          <tr><th>RGB</th><td><input id="materialColorAmbient-rgb" onchange="setString('materialColorAmbient', this.value)" /></td></tr>
-          <tr><th>HEX</th><td><input id="materialColorAmbient-hex" onchange="setString('materialColorAmbient', this.value)" /></td></tr>
-          <tr class="red"><th>R</th><td><input id="materialColorAmbient-red" class="short" onchange="setRGB('materialColorAmbient', this.value, null, null)" /></td></tr>
-          <tr class="grn"><th>G</th><td><input id="materialColorAmbient-grn" class="short" onchange="setRGB('materialColorAmbient', null, this.value, null)" /></td></tr>
-          <tr class="blu"><th>B</th><td><input id="materialColorAmbient-blu" class="short" onchange="setRGB('materialColorAmbient', null, null, this.value)" /></td></tr>
+          <tr><th>RGB</th><td><input id="materialAmbient-rgb" onchange="setString('materialAmbient', this.value)" /></td></tr>
+          <tr><th>HEX</th><td><input id="materialAmbient-hex" onchange="setString('materialAmbient', this.value)" /></td></tr>
+          <tr class="red"><th>R</th><td><input id="materialAmbient-red" class="short" onchange="setRGB('materialAmbient', this.value, null, null)" /></td></tr>
+          <tr class="grn"><th>G</th><td><input id="materialAmbient-grn" class="short" onchange="setRGB('materialAmbient', null, this.value, null)" /></td></tr>
+          <tr class="blu"><th>B</th><td><input id="materialAmbient-blu" class="short" onchange="setRGB('materialAmbient', null, null, this.value)" /></td></tr>
         </table>
       </div>
       <div class="panel materialDiffuse">
-        <button id="materialDiffuse-button">diffse material color</button>
+        <button class="ui button" id="materialDiffuse-button">diffuse material color</button>
         <table>
           <tr><th>RGB</th><td><input id="materialDiffuse-rgb" onchange="setString('materialDiffuse', this.value)" /></td></tr>
           <tr><th>HEX</th><td><input id="materialDiffuse-hex" onchange="setString('materialDiffuse', this.value)" /></td></tr>
@@ -69,7 +164,7 @@
         </table>
       </div>
       <div class="panel materialSpecular">
-        <button id="materialSpecular-button">diffse material color</button>
+        <button class="ui button" id="materialSpecular-button">specular material color</button>
         <table>
           <tr><th>RGB</th><td><input id="materialSpecular-rgb" onchange="setString('materialSpecular', this.value)" /></td></tr>
           <tr><th>HEX</th><td><input id="materialSpecular-hex" onchange="setString('materialSpecular', this.value)" /></td></tr>
@@ -85,12 +180,20 @@
 <script id="gouraud-fragmentShader" type="x-shader/x-fragment">
   precision mediump float;
   uniform sampler2D uSampler;
+  uniform bool uIfUseTexture;
+  varying vec3 vVertexFrontColor;
   varying vec2 vTextureCoord;
   varying vec3 vlightWeighting;
 
   void main(void) {
-      vec4 fragcolor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-      gl_FragColor = vec4(fragcolor.rgb * vlightWeighting, fragcolor.a);
+      vec4 vFragcolor;
+      if (uIfUseTexture) {
+        vFragcolor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+      }
+      else {
+        vFragcolor = vec4(vVertexFrontColor, 1.0);
+      }
+      gl_FragColor = vec4(vFragcolor.rgb * vlightWeighting, vFragcolor.a);
   }
 </script>
 <script id="gouraud-vertexShader" type="x-shader/x-vertex">
@@ -99,12 +202,12 @@
   attribute vec3 aVertexPosition;
   attribute vec3 aVertexNormal;
   attribute vec2 aTextureCoord;
-  //attribute vec3 aFrontColor;
+  attribute vec3 aVertexFrontColor;
 
   uniform mat4 uMVMatrix;
   uniform mat4 uPMatrix;
   uniform mat3 uNMatrix;
-  uniform vec4 lightPosition;
+  uniform vec4 lightPositions[3];
   uniform vec3 uMaterialAmbient;
   uniform vec3 uMaterialDiffuse;
   uniform vec3 uMaterialSpecular;
@@ -112,31 +215,37 @@
   uniform vec3 uDiffuse;
   uniform vec3 uSpecular;
   uniform float uShininess;
+  uniform bool uIsLightShow[3];
 
   varying vec2 vTextureCoord;
   varying vec3 vlightWeighting;
+  varying vec3 vVertexFrontColor;
 
   void main(void) {
     vec3 pos = (uMVMatrix * vec4(aVertexPosition, 1.0)).xyz;
-    //光的方向
-    vec3 L = normalize(lightPosition.xyz - pos);
     //單位法向量
     vec3 normal = normalize(uNMatrix * aVertexNormal);
 
-    //vec4 fragmentColor = texture2D(uSampler, vec2(aTextureCoord.s, aTextureCoord.t));
-    //vec4 fragmentColor = vec4(aVertexFrontColor, 1.0);
     vec3 eyeDirection = normalize(-pos);
 
-    //specular weight
-    vec3 reflectionDirection = reflect(-L, normal);
-    float specularWeight = pow(max(dot(reflectionDirection, eyeDirection),0.0),uShininess);
-    vec3 specular = specularWeight * (uSpecular*uMaterialSpecular);
+    vlightWeighting = vec3(0.0,0.0,0.0);
+    for(int i = 0; i<3; i++) {
+      if (uIsLightShow[i]) {
+        //光的方向
+        vec3 L = normalize(lightPositions[i].xyz - pos);
+        //specular weight
+        vec3 reflectionDirection = reflect(-L, normal);
+        float specularWeight = pow(max(dot(reflectionDirection, eyeDirection),0.0),uShininess);
+        vec3 specular = specularWeight * (uSpecular*uMaterialSpecular);
 
-    //diffuse weight
-    float diffuseWeight = max(dot(normal, L), 0.0);
-    vec3 diffuse = diffuseWeight * (uDiffuse*uMaterialDiffuse);
-    vlightWeighting = uAmbient*uMaterialAmbient + specular + diffuse;
+        //diffuse weight
+        float diffuseWeight = max(dot(normal, L), 0.0);
+        vec3 diffuse = diffuseWeight * (uDiffuse*uMaterialDiffuse);
+        vlightWeighting += uAmbient*uMaterialAmbient + specular + diffuse;
+      }
+    }
     vTextureCoord = aTextureCoord;
+    vVertexFrontColor = aVertexFrontColor;
     gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
   }
 </script>
@@ -152,36 +261,49 @@
   uniform vec3 uDiffuse;
   uniform vec3 uSpecular;
   uniform float uShininess;
-  uniform vec4 lightPosition;
+  uniform vec4 lightPositions[3];
   uniform mat4 uMVMatrix;
   uniform sampler2D uSampler;
+  uniform bool uIsLightShow[3];
+  uniform bool uIfUseTexture;
 
   varying vec3 vVertexPosition;
   varying vec2 vTextureCoord;
   varying vec3 vVertexNormal;
-  //varying vec3 vFrontColor;
+  varying vec3 vVertexFrontColor;
 
 
   void main(void) {
       vec3 eyeDirection = normalize(-vVertexPosition);
       vec3 pos = (uMVMatrix * vec4(vVertexPosition, 1.0)).xyz;
 
-      //光的方向
-      vec3 L = normalize(lightPosition.xyz - vVertexPosition);
+
       //單位法向量
       vec3 normal = normalize(uNMatrix * vVertexNormal);
+      vec3 lightWeighting = vec3(0.0,0.0,0.0);
+      for(int i = 0; i<3; i++) {
+        if (uIsLightShow[i]) {
+          //光的方向
+          vec3 L = normalize(lightPositions[i].xyz - vVertexPosition);
 
-      //specular weight
-      vec3 reflectionDirection = reflect(-L, normal);
-      float specularWeight = pow(max(dot(reflectionDirection, eyeDirection),0.0),uShininess);
-      vec3 specular = specularWeight * (uSpecular*uMaterialSpecular);
+          //specular weight
+          vec3 reflectionDirection = reflect(-L, normal);
+          float specularWeight = pow(max(dot(reflectionDirection, eyeDirection),0.0),uShininess);
+          vec3 specular = specularWeight * (uSpecular*uMaterialSpecular);
 
-      //diffuse weight
-      float diffuseWeight = max(dot(normal, L), 0.0);
-      vec3 diffuse = diffuseWeight * (uDiffuse*uMaterialDiffuse);
-      vec3 lightWeighting = uAmbient*uMaterialAmbient + specular + diffuse;
-
-      vec4 fragcolor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+          //diffuse weight
+          float diffuseWeight = max(dot(normal, L), 0.0);
+          vec3 diffuse = diffuseWeight * (uDiffuse*uMaterialDiffuse);
+          lightWeighting += uAmbient*uMaterialAmbient + specular + diffuse;
+        }
+      }
+      vec4 fragcolor;
+      if (uIfUseTexture) {
+        fragcolor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+      }
+      else {
+        fragcolor = vec4(vVertexFrontColor, 1.0);
+      }
       gl_FragColor = vec4(fragcolor.rgb * lightWeighting, fragcolor.a);
   }
 </script>
@@ -192,9 +314,9 @@
     attribute vec3 aVertexPosition;
     attribute vec3 aVertexNormal;
     attribute vec2 aTextureCoord;
-    //attribute vec3 aFrontColor;
+    attribute vec3 aVertexFrontColor;
 
-    uniform vec4 lightPosition;
+    uniform vec4 lightPositions[3];
     uniform mat3 uNMatrix;
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
@@ -202,7 +324,7 @@
     varying vec3 vVertexPosition;
     varying vec2 vTextureCoord;
     varying vec3 vVertexNormal;
-    //varying vec3 vFrontColor;
+    varying vec3 vVertexFrontColor;
 
     void main(void) {
         vVertexNormal = aVertexNormal;
@@ -210,7 +332,7 @@
         vVertexPosition = aVertexPosition;
         vVertexPosition = (uMVMatrix * vec4(aVertexPosition, 1.0)).xyz;
 
-        //vFrontColor = aFrontColor;
+        vVertexFrontColor = aVertexFrontColor;
         gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
     }
 </script>
@@ -224,8 +346,7 @@
 
     varying vec4 vFragcolor;
     varying vec3 vVertexPosition;
-    varying vec3 L;
-    varying vec3 eyeDirection;
+    varying vec3 L[3];
 
     uniform vec3 uMaterialAmbient;
     uniform vec3 uMaterialDiffuse;
@@ -234,21 +355,30 @@
     uniform vec3 uDiffuse;
     uniform vec3 uSpecular;
     uniform float uShininess;
+    uniform bool uIsLightShow[3];
+    uniform vec4 lightPositions[3];
 
 
     void main(void) {
+      vec3 eyeDirection = normalize(-vVertexPosition);
       vec3 dx = dFdx(vVertexPosition);
       vec3 dy = dFdy(vVertexPosition);
       vec3 normal = normalize(cross(dx, dy));
 
-      //specular weight
-      vec3 reflectionDirection = reflect(-L, normal);
-      float specularWeight = pow(max(dot(reflectionDirection, eyeDirection),0.0),uShininess);
-      vec3 specular = specularWeight * (uSpecular*uMaterialSpecular);
-      //diffuse weight
-      float diffuseWeight = max(dot(normal, L), 0.0);
-      vec3 diffuse = diffuseWeight * (uDiffuse*uMaterialDiffuse);
-      vec3 lightWeighting = uAmbient*uMaterialAmbient + specular + diffuse;
+      vec3 lightWeighting = vec3(0.0,0.0,0.0);
+      for(int i = 0; i<3; i++) {
+        if(uIsLightShow[i]) {
+          //specular weight
+          vec3 reflectionDirection = reflect(-L[i], normal);
+          float specularWeight = pow(max(dot(reflectionDirection, eyeDirection),0.0),uShininess);
+          vec3 specular = specularWeight * (uSpecular*uMaterialSpecular);
+          //diffuse weight
+          float diffuseWeight = max(dot(normal, L[i]), 0.0);
+          vec3 diffuse = diffuseWeight * (uDiffuse*uMaterialDiffuse);
+          lightWeighting += uAmbient*uMaterialAmbient + specular + diffuse;
+        }
+      }
+
       gl_FragColor = vec4(vFragcolor.rgb * lightWeighting, vFragcolor.a);
     }
 
@@ -260,7 +390,6 @@
     attribute vec3 aVertexNormal;
     attribute vec2 aTextureCoord;
     attribute vec3 aVertexFrontColor;
-    //attribute vec3 aFrontColor;
 
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
@@ -268,78 +397,28 @@
 
     varying vec4 vFragcolor;
     varying vec3 vVertexPosition;
-    varying vec3 L;
-    varying vec3 eyeDirection;
+    varying vec3 L[3];
 
-    uniform vec4 lightPosition;
+    uniform vec4 lightPositions[3];
     uniform sampler2D uSampler;
+    uniform bool uIfUseTexture;
 
     void main(void) {
         vec3 pos = (uMVMatrix * vec4(aVertexPosition,1.0)).xyz;
-        //光的方向
-        L = normalize(lightPosition.xyz - pos);
         vVertexPosition = (uMVMatrix * vec4(aVertexPosition, 1.0)).xyz;
-        eyeDirection = normalize(-vVertexPosition);
-
-        vFragcolor = texture2D(uSampler, vec2(aTextureCoord.s, aTextureCoord.t));
-        //vec4 fragmentColor = vec4(aVertexFrontColor, 1.0);
+        for(int i = 0; i<3; i++) {
+          //光的方向
+          L[i] = normalize(lightPositions[i].xyz - pos);
+        }
+        if (uIfUseTexture) {
+          vFragcolor = texture2D(uSampler, vec2(aTextureCoord.s, aTextureCoord.t));
+        }
+        else {
+          vFragcolor = vec4(aVertexFrontColor, 1.0);
+        }
         gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
     }
 
-</script>
-<script id="fragmentShader" type="x-shader/x-fragment">
-    #extension GL_OES_standard_derivatives:enable
-    precision mediump float;
-    varying vec3 N, L, E;
-    varying vec4 fColor;
-    void main(void) {
-        gl_FragColor = fColor;
-    }
-</script>
-
-<script id="vertexShader" type="x-shader/x-fragment">
-    attribute vec3 aVertexPosition;
-    attribute vec3 aVertexNormal;
-    attribute vec2 aTextureCoord;
-    attribute vec3 aFrontColor;
-    uniform mat4 uMVMatrix;
-    uniform mat4 uPMatrix;
-    uniform vec4 lightPosition;
-    varying vec3 N, L, E;
-    //uniform sampler2D uSampler;
-
-    uniform vec4 uMaterialAmbient;
-    uniform vec4 uMaterialDiffuse;
-    uniform vec4 uMaterialSpecular;
-    uniform vec4 uAmbient;
-    uniform vec4 uDiffuse;
-    uniform vec4 uSpecular;
-    uniform float uShininess;
-
-    varying vec4 fColor;
-    void main(void) {
-      vec3 tn = normalize(cross(dx, dy));
-      vec3 pos = -(uMVMatrix * vec4(aVertexPosition,1.0)).xyz;
-      vec3 light = lightPosition.xyz;
-      L = normalize(light - pos);
-      E = -pos;
-      N = normalize((uMVMatrix * vec4(aVertexNormal,1.0)).xyz);
-
-
-      vec3 H = normalize(L + E);
-      vec4 ambient_product = uAmbient*uMaterialAmbient;
-      float diffuseWeight = max(dot(L, N), 0.0);
-      vec4 diffuse_product = diffuseWeight * (uDiffuse*uMaterialDiffuse);
-      float specularWeight = pow(max(dot(N, H), 0.0), uShininess);
-      vec4 specular_product = specularWeight * (uSpecular*uMaterialSpecular);
-
-      if (dot(L, N)<0.0) {
-          specular_product = vec4(0.0, 0.0, 0.0, 1.0);
-      }
-      fColor = ambient_product + diffuse_product + specular_product;
-      fColor.a = 1.0;
-      gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-    }
 </script>
 <script type="text/javascript" src="js/main.js"></script>
 </head>

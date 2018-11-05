@@ -3,10 +3,19 @@
 }
 .panel {
   /* float: left; */
+  /* position: absolute; */
+  text-align: center;
+
+  margin: 0px auto;
   Display: table-cell;
 }
+.button {
+  /* position: absolute; */
 
-.lightColor .materialColor {
+  margin: 0px auto;
+}
+.lightColor .materialColor .render {
   Display: table;
+
 }
 

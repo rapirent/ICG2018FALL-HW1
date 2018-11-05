@@ -1,34 +1,58 @@
 "use strict";
+window.requestAnimFrame = (function() {
+  return window.requestAnimationFrame ||
+         window.webkitRequestAnimationFrame ||
+         window.mozRequestAnimationFrame ||
+         window.oRequestAnimationFrame ||
+         window.msRequestAnimationFrame ||
+         function(/* function FrameRequestCallback */ callback, /* DOMElement Element */ element) {
+          window.setTimeout(callback, 1000/60);
+        };
+})();
+window.cancelRequestAnimFrame = (function(){
+  return (window.cancelAnimationFrame ||
+          window.webkitCancelRequestAnimationFrame ||
+          window.mozCancelRequestAnimationFrame ||
+          window.oCancelRequestAnimationFrame ||
+          window.msCancelRequestAnimationFrame ||
+          window.clearTimeout(callback))
+})();
+var renderAgain = false;
+var animRequest = null;
 var gl;
 
-var near = -10;
-var far = 10;
-var radius = 1.5;
-var theta  = 0.0;
-var phi    = 0.0;
-var dr = 5.0 * Math.PI/180.0;
-
-var left = -3.0;
-var right = 3.0;
-var ytop =3.0;
-var bottom = -3.0;
-var eye;
-var at = vec3.fromValues(0.0, 0.0, 0.0);
-var up = vec3.fromValues(0.0, 1.0, 0.0);
+function updateRenderer() {
+  console.log('stop')
+  cancelAnimationFrame(animRequest)
+  then();
+}
 
 var transFactors = [{
     xFactor: -40,
-    yFactor: 0,
-    zFactor: -100,
+    yFactor: 5,
+    zFactor: 0,
   },{
     xFactor: 0,
-    yFactor: 0,
-    zFactor: -60,
+    yFactor: 5,
+    zFactor: 0,
   },{
     xFactor: 40,
-    yFactor: 0,
-    zFactor: -100,
+    yFactor: 5,
+    zFactor: 0,
 }]
+// var transFactors = [{
+//   xFactor: -20,
+//   yFactor: 0,
+//   zFactor: -15,
+// },{
+//   xFactor: 0,
+//   yFactor: 0,
+//   zFactor: -5,
+// },{
+//   xFactor: 20,
+//   yFactor: 0,
+//   zFactor: -15,
+// }]
 var shearFactor = [{
   xFactor: 0,
   yFactor: 0,
@@ -48,9 +72,13 @@ var animateSetting = {
   xAngle: 0,
   yAngle: 180
 }
-var scale = {
-
+var useTextureSetting = [true, true, true]
+var scaleFactor = {
+  xFactor: 1,
+  yFactor: 1,
+  zFactor: 1
 }
+var isLightShow = [true, true, true]
 function initGL(canvas) {
   try {
     gl = canvas.getContext("webgl") || canvas.getContext('experimental-webgl');
@@ -133,19 +161,23 @@ function initShaders(shading) {
 }
 
 function createLocations(selectedProgram) {
+  console.log('creating location and attribute')
   gl.useProgram(selectedProgram);
   selectedProgram.vertexPositionAttribute = gl.getAttribLocation(selectedProgram, "aVertexPosition");
   if (selectedProgram.vertexPositionAttribute >= 0) {
+    console.log('use vertex position ')
     gl.enableVertexAttribArray(selectedProgram.vertexPositionAttribute);
   }
 
-  selectedProgram.vertexFrontColorAttribute = gl.getAttribLocation(selectedProgram, "aFrontColor");
+  selectedProgram.vertexFrontColorAttribute = gl.getAttribLocation(selectedProgram, "aVertexFrontColor");
   if (selectedProgram.vertexFrontColorAttribute >= 0) {
+    console.log('use front color ')
     gl.enableVertexAttribArray(selectedProgram.vertexFrontColorAttribute);
   }
 
   selectedProgram.vertexNormalAttribute = gl.getAttribLocation(selectedProgram, "aVertexNormal");
   if (selectedProgram.vertexNormalAttribute >= 0) {
+    console.log('use vertex normal ')
     gl.enableVertexAttribArray(selectedProgram.vertexNormalAttribute);
   }
 
@@ -155,7 +187,9 @@ function createLocations(selectedProgram) {
   selectedProgram.pMatrixUniform = gl.getUniformLocation(selectedProgram, "uPMatrix");
   selectedProgram.mvMatrixUniform = gl.getUniformLocation(selectedProgram, "uMVMatrix");
   selectedProgram.samplerUniform = gl.getUniformLocation(selectedProgram, "uSampler");
-  selectedProgram.lightPosition = gl.getUniformLocation(selectedProgram, "lightPosition");
+  selectedProgram.lightPositions = gl.getUniformLocation(selectedProgram, "lightPositions");
+  selectedProgram.isLightShow = gl.getUniformLocation(selectedProgram, "uIsLightShow");
+
   selectedProgram.nMatrixUniform = gl.getUniformLocation(selectedProgram, "uNMatrix");
   //對應到ICG課本上的materialAmbient
   selectedProgram.materialAmbient = gl.getUniformLocation(selectedProgram, "uMaterialAmbient");
@@ -167,6 +201,8 @@ function createLocations(selectedProgram) {
   selectedProgram.specular = gl.getUniformLocation(selectedProgram, "uSpecular");
   // for specular
   selectedProgram.shininess = gl.getUniformLocation(selectedProgram, "uShininess")
+  // for specify
+  selectedProgram.ifUseTexture = gl.getUniformLocation(selectedProgram, "uIfUseTexture")
 }
 function createBuffers(loadedData) {
   var normalBuffer = gl.createBuffer();
@@ -175,11 +211,15 @@ function createBuffers(loadedData) {
   normalBuffer.itemSize = 3;
   normalBuffer.numItems = loadedData.vertexNormals.length / 3;
 
-  var textureCoordBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(loadedData.vertexTextureCoords), gl.STATIC_DRAW);
-  textureCoordBuffer.itemSize = 2;
-  textureCoordBuffer.numItems = loadedData.vertexTextureCoords.length / 2;
+  if (loadedData.vertexTextureCoords) {
+    var textureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(loadedData.vertexTextureCoords), gl.STATIC_DRAW);
+    textureCoordBuffer.itemSize = 2;
+    textureCoordBuffer.numItems = loadedData.vertexTextureCoords.length / 2;
+  } else {
+    console.log('No vertex texture coords')
+  }
 
   var positionBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -200,6 +240,8 @@ function createBuffers(loadedData) {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(loadedData.vertexFrontColors), gl.STATIC_DRAW);
     vertexFrontColorBuffer.itemSize = 3;
     vertexFrontColorBuffer.numItems = loadedData.vertexFrontColors.length / 3;
+  } else {
+    console.log('No vertex texture colors')
   }
 
 
@@ -227,7 +269,11 @@ function updateMVMatrix(number) {
   mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 200.0);
   mat4.identity(mvMatrix);
   mat4.translate(mvMatrix, mvMatrix, [0, 0, -40]);
-  // mat4.scale(mvMatrix, mvMatrix, [1,1,1]);
+  mat4.scale(
+    mvMatrix,
+    mvMatrix,
+    [scaleFactor.xFactor,scaleFactor.yFactor, scaleFactor.zFactor]
+  );
 
   mat4.translate(
     mvMatrix,
@@ -242,7 +288,7 @@ function updateMVMatrix(number) {
   mat4.rotateX(mvMatrix, mvMatrix, degToRad(animateSetting.xAngle))
   mat4.rotateY(mvMatrix, mvMatrix, degToRad(animateSetting.yAngle));
 }
-function updateAttributesAndUniforms(selectedProgram, buffers, texture,i) {
+function updateAttributesAndUniforms(selectedProgram, buffers, texture, number) {
   gl.useProgram(selectedProgram);
   if (!buffers ||
     buffers.position == null ||
@@ -256,7 +302,7 @@ function updateAttributesAndUniforms(selectedProgram, buffers, texture,i) {
 
   gl.bindTexture(gl.TEXTURE_2D, texture);
   gl.uniform1i(selectedProgram.samplerUniform, 0);
-  updateMVMatrix(i);
+  updateMVMatrix(number);
   //console.log(mvMatrix)
 
   gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
@@ -273,28 +319,52 @@ function updateAttributesAndUniforms(selectedProgram, buffers, texture,i) {
   gl.bindBuffer(gl.ARRAY_BUFFER, buffers.textureCoord);
   gl.vertexAttribPointer(selectedProgram.textureCoordAttribute, buffers.textureCoord.itemSize, gl.FLOAT, false, 0, 0);
 
-  gl.uniform3f(selectedProgram.materialAmbient, 0.2, 0.2, 0.2 );
-  gl.uniform3f(selectedProgram.materialDiffuse, 0.8,0.8,0.8 );
-  gl.uniform3f(selectedProgram.materialSpecular, 0.8, 0.8, 0.8 );
+  gl.uniform3f(selectedProgram.materialAmbient,
+    Math.round(pickers.materialAmbient.rgb[0])/255,
+    Math.round(pickers.materialAmbient.rgb[1])/255,
+    Math.round(pickers.materialAmbient.rgb[2])/255
+    //0.2, 0.2, 0.2
+  );
+  gl.uniform3f(selectedProgram.materialDiffuse,
+    Math.round(pickers.materialDiffuse.rgb[0])/255,
+    Math.round(pickers.materialDiffuse.rgb[1])/255,
+    Math.round(pickers.materialDiffuse.rgb[2])/255
+    // 0.8,0.8,0.8
+  );
+  gl.uniform3f(selectedProgram.materialSpecular,
+    Math.round(pickers.materialSpecular.rgb[0])/255,
+    Math.round(pickers.materialSpecular.rgb[1])/255,
+    Math.round(pickers.materialSpecular.rgb[2])/255
+    //0.8, 0.8, 0.8
+  );
   gl.uniform3f(selectedProgram.ambient,
-    Math.round(pickers.lightColorAmbient.rgb[0])/256,
-    Math.round(pickers.lightColorAmbient.rgb[1])/256,
-    Math.round(pickers.lightColorAmbient.rgb[2])/256
+    Math.round(pickers.lightColorAmbient.rgb[0])/255,
+    Math.round(pickers.lightColorAmbient.rgb[1])/255,
+    Math.round(pickers.lightColorAmbient.rgb[2])/255
   );
   gl.uniform3f(selectedProgram.diffuse,
-    Math.round(pickers.lightColorDiffuse.rgb[0])/256,
-    Math.round(pickers.lightColorDiffuse.rgb[1])/256,
-    Math.round(pickers.lightColorDiffuse.rgb[2])/256
+    Math.round(pickers.lightColorDiffuse.rgb[0])/255,
+    Math.round(pickers.lightColorDiffuse.rgb[1])/255,
+    Math.round(pickers.lightColorDiffuse.rgb[2])/255
   );
   gl.uniform3f(selectedProgram.specular,
-    Math.round(pickers.lightColorSpecular.rgb[0])/256,
-    Math.round(pickers.lightColorSpecular.rgb[1])/256,
-    Math.round(pickers.lightColorSpecular.rgb[2])/256
+    Math.round(pickers.lightColorSpecular.rgb[0])/255,
+    Math.round(pickers.lightColorSpecular.rgb[1])/255,
+    Math.round(pickers.lightColorSpecular.rgb[2])/255
   )
   //gl.uniform3f(selectedProgram.specular, 1, 1, 1 );
-  gl.uniform4f(selectedProgram.lightPosition, -10.0, 4.0, 20.0, 1.0 );
+  var lightPositions = [];
+  for (var i = 1; i <= 3; i++) {
+    lightPositions.push(parseFloat($('#light'+ i + 'x').val()))
+    lightPositions.push(parseFloat($('#light'+ i + 'y').val()))
+    lightPositions.push(parseFloat($('#light'+ i + 'z').val()))
+    lightPositions.push(1.0)
+  }
+  gl.uniform4fv(selectedProgram.lightPositions,  lightPositions);
+  gl.uniform1iv(selectedProgram.isLightShow, isLightShow);
+  // gl.uniform4f(selectedProgram.lightPosition, -10.0, 4.0, 20.0, 1.0 );
 
-
+  gl.uniform1i(selectedProgram.ifUseTexture, useTextureSetting[number])
   // var lightLocationArray = [],lightEnabledArray = [];
   // for (var i = 0; i < 3; i++) {
   //   lightLocationArray.push();
@@ -393,14 +463,14 @@ async function animate() {
 }
 
 function tick(shaders,buffersArray,texture) {
-    requestAnimationFrame(function(){
-      tick(shaders,buffersArray,texture)
-    });
-    setViewPort();
-    updateAttributesAndUniforms(shaders.flatShader,buffersArray[0],texture,0);
-    updateAttributesAndUniforms(shaders.gouraudShader,buffersArray[1],texture,1);
-    updateAttributesAndUniforms(shaders.phongShader,buffersArray[2],texture,2);
-    animate();
+  animRequest = requestAnimFrame(function(){
+    tick(shaders,buffersArray,texture)
+  });
+  setViewPort();
+  updateAttributesAndUniforms(shaders[0],buffersArray[0],texture,0);
+  updateAttributesAndUniforms(shaders[1],buffersArray[1],texture,1);
+  updateAttributesAndUniforms(shaders[2],buffersArray[2],texture,2);
+  animate();
 }
 
 function loadFile(file_path) {
@@ -479,20 +549,68 @@ async function handelKeyEvent(event) {
   })
 }
 
+
+async function start(url){
+  return new Promise(function(resolve, reject) {
+    console.log(url)
+    var loadedData;
+    $.get( url, function( data ) {
+      loadedData = $.parseJSON(JSON.stringify(data))
+    }).done(function(){
+      resolve(loadedData);
+    })
+  })
+}
+async function then() {
+  await console.log($('#object1').val(),$('#object2').val(),$('#object3').val())
+  var data1 = await start('data/'+ $('#object1').val() + '.json'),
+    data2 = await start('data/'+ $('#object2').val() + '.json'),
+    data3 = await start('data/'+ $('#object3').val() + '.json');
+  var datas = [data1,data2,data3];
+  var texture = initTextures('galvanizedTexture.jpg')
+  var shaders = [
+    initShaders('flat-'),
+    initShaders('gouraud-'),
+    initShaders('phong-')
+  ]
+  var buffersArray = []
+  if (datas != null) {
+    for (var i =0; i<datas.length; i++) {
+      buffersArray.push(createBuffers(datas[i]))
+    }
+  }
+  console.log(buffersArray)
+  gl.clearColor(0.0, 0.2, 0.2, 1.0);
+  gl.enable(gl.DEPTH_TEST);
+  tick(shaders,buffersArray,texture)
+}
+
 window.onload = function webGLStart() {
     // initTextures();
   pickers.lightColorAmbient = new jscolor('lightColorAmbient-button', options);
   pickers.lightColorAmbient.onFineChange = "updateColorPanel('lightColorAmbient')";
-  pickers.lightColorAmbient.fromString('AB2567');
+  pickers.lightColorAmbient.fromString('333333');
   pickers.lightColorDiffuse = new jscolor('lightColorDiffuse-button', options);
   pickers.lightColorDiffuse.onFineChange = "updateColorPanel('lightColorDiffuse')";
-  pickers.lightColorDiffuse.fromString('AB2567');
+  pickers.lightColorDiffuse.fromString('CDCDCD');
   pickers.lightColorSpecular = new jscolor('lightColorSpecular-button', options);
   pickers.lightColorSpecular.onFineChange = "updateColorPanel('lightColorSpecular')";
-  pickers.lightColorSpecular.fromString('AB2567');
+  pickers.lightColorSpecular.fromString('CDCDCD');
+  pickers.materialAmbient = new jscolor('materialAmbient-button', options);
+  pickers.materialAmbient.onFineChange = "updateColorPanel('materialAmbient')";
+  pickers.materialAmbient.fromString('FFFFFF');
+  pickers.materialDiffuse = new jscolor('materialDiffuse-button', options);
+  pickers.materialDiffuse.onFineChange = "updateColorPanel('materialDiffuse')";
+  pickers.materialDiffuse.fromString('FFFFFF');
+  pickers.materialSpecular = new jscolor('materialSpecular-button', options);
+  pickers.materialSpecular.onFineChange = "updateColorPanel('materialSpecular')";
+  pickers.materialSpecular.fromString('FFFFFF');
   updateColorPanel('lightColorAmbient');
   updateColorPanel('lightColorDiffuse');
   updateColorPanel('lightColorSpecular');
+  updateColorPanel('materialAmbient');
+  updateColorPanel('materialDiffuse');
+  updateColorPanel('materialSpecular');
   var canvas = $('#canvas')
   initGL(canvas[0]);
   //keyboard
@@ -507,50 +625,8 @@ window.onload = function webGLStart() {
       var pressKey = event.keyCode|| event.which;
       if (pressKey == 13) {
         startAnimate = !startAnimate;
-      }
-    })
-  function start(url){
-    return new Promise(function(resolve, reject) {
-      var loadedData;
-      $.get( url, function( data ) {
-        loadedData = $.parseJSON(JSON.stringify(data))
-      }).done(function(data){
-        resolve(loadedData);
-      })
-    })
-  }
-  async function then() {
-    var data1 = await start('data/Teapot.json'),
-      data2 = await start('data/Teapot.json'),
-      data3 = await start('data/Teapot.json');
-    var datas = [data1,data2,data3];
-    var texture = initTextures('galvanizedTexture.jpg')
-    var shaders = {
-      flatShader: initShaders('flat-'),
-      gouraudShader: initShaders('gouraud-'),
-      phongShader: initShaders('phong-')
-    }
-    var buffersArray = []
-    if (datas != null) {
-      for (var i =0; i<datas.length; i++) {
-        buffersArray.push(createBuffers(datas[i]))
-      }
-    }
-    gl.clearColor(0.0, 0.2, 0.2, 1.0);
-    tick(shaders,buffersArray,texture)
-  }
+      }})
   then();
-
-  // $.getJSON("Teapot.json", function(json){
-  //   var buffers = createBuffers(json);
-  // }).done(function(json){
-  //   var selectedProgram = initShaders();
-  //   gl.clearColor(0.8, 0.5, 0.2, 1.0);
-  //   gl.enable(gl.DEPTH_TEST);
-
-  //   tick(selectedProgram)
-  // })
-  //loadTeapot('data/mig27.tri.json')
 }
 
 var options = {
@@ -600,3 +676,12 @@ function hexToRgbA(hex){
   }
   throw new Error('Bad Hex');
 }
+$('.ui.dropdown').dropdown();
+// $('.checkbox').checkbox().checkbox({
+//   onChecked: function() {
+//     isLightShow[int($(this).attr('id')) - 1] = true
+//   },
+//   onUnchecked: function() {
+//     isLightShow[int($(this).attr('id')) - 1] = false
+//   }
+// })
