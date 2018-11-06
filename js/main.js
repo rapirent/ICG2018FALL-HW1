@@ -187,7 +187,7 @@ function initShaders(shading) {
   if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
     console.log(vertexShader,fragmentShader,shaderProgram)
     console.log(gl.getProgramInfoLog(shaderProgram))
-      alert("Could not initialize shaders");
+    alert("Could not initialize shaders");
   }
 
   gl.useProgram(shaderProgram);

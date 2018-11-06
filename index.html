@@ -20,7 +20,7 @@
               <a class="ui primary button" onclick="updateRenderer()" style="position: relative;">Re-Render</a>
               <div class="or" data-text="AS"></div>
               <div class="ui dropdown button" style="position: relative;">
-                <input type="hidden" value="matcap2.jpg" id="texture">
+                <input type="hidden" value="galvanizedTexture.jpg" id="texture">
                 <i class="dropdown icon"></i>
                 <div class="default text">select render texture</div>
                 <div class="menu">
@@ -28,7 +28,9 @@
                   <div class="item" data-value="moon.gif">moon</div>
                   <div class="item" data-value="red.jpg">red</div>
                   <div class="item" data-value="frontcolor">Item Front Color</div>
-                  <div class="item" data-value="matcap2.jpg">black</div>
+                  <div class="item" data-value="matcap.jpg">matte red</div>
+                  <div class="item" data-value="matcap2.jpg">shinny black</div>
+                  <div class="item" data-value="matcap3.jpg">skin</div>
                 </div>
               </div>
             </div>
@@ -57,9 +59,11 @@
               <i class="dropdown icon"></i>
               <div class="default text">select #1 shading</div>
               <div class="menu">
-                <div class="item" data-value="flat-">flat</div>
-                <div class="item" data-value="gouraud-">gouraud</div>
-                <div class="item" data-value="phong-">phong</div>
+                  <div class="item" data-value="flat-">flat</div>
+                  <div class="item" data-value="gouraud-">gouraud</div>
+                  <div class="item" data-value="phong-">phong</div>
+                  <div class="item" data-value="sem-vertex-">spherical enviorment per vertex</div>
+                  <div class="item" data-value="sem-fragment-">spherical enviorment per fragment</div>
               </div>
             </div>
           </div>
@@ -83,15 +87,15 @@
               </div>
             </div>
             <div class="ui dropdown" style="position: relative;">
-              <input type="hidden" value="sem-fragment-" id="shading2">
+              <input type="hidden" value="gouraud-" id="shading2">
               <i class="dropdown icon"></i>
               <div class="default text">select #2 shading</div>
               <div class="menu">
                 <div class="item" data-value="flat-">flat</div>
                 <div class="item" data-value="gouraud-">gouraud</div>
                 <div class="item" data-value="phong-">phong</div>
-                <div class="item" data-value="sem-vertex-">spherical enviorment (feat.gouraud)</div>
-                <div class="item" data-value="sem-fragment-">spherical enviorment (feat.phong)</div>
+                <div class="item" data-value="sem-vertex-">spherical enviorment per vertex</div>
+                <div class="item" data-value="sem-fragment-">spherical enviorment per fragment</div>
               </div>
             </div>
           </div>
@@ -119,9 +123,11 @@
               <i class="dropdown icon"></i>
               <div class="default text">select #3 shading</div>
               <div class="menu">
-                <div class="item" data-value="flat-">flat</div>
-                <div class="item" data-value="gouraud-">gouraud</div>
-                <div class="item" data-value="phong-">phong</div>
+                  <div class="item" data-value="flat-">flat</div>
+                  <div class="item" data-value="gouraud-">gouraud</div>
+                  <div class="item" data-value="phong-">phong</div>
+                  <div class="item" data-value="sem-vertex-">spherical enviorment per vertex</div>
+                  <div class="item" data-value="sem-fragment-">spherical enviorment per fragment</div>
               </div>
             </div>
           </div>
@@ -160,54 +166,73 @@
           <tr class="blu"><th>B</th><td><input id="lightColorSpecular-blu" class="short" onchange="setRGB('lightColorSpecular', null, null, this.value)" /></td></tr>
         </table>
       </div>
-      <div class="ui segment panel">
-        <div class="lightchoose">
-          <div class="ui checkbox light">
-            <input type="checkbox" checked id="1">
-            <label>Main Light</label>
+      <div class="ui center aligned segments panel">
+        <div class="ui horizontal segments">
+          <div class="ui segment">
+            <div class="ui checkbox light" id="lightpenel">
+              <input type="checkbox" checked id="1">
+              <label>Main Light</label>
+            </div>
           </div>
-          <div class="ui input">
-            <input type="text" value="-10" placeholder="-10" id="light1x">
-          </div>
-          <div class="ui input">
-            <input type="text" value="4" placeholder="4" id="light1y">
-          </div>
-          <div class="ui input">
-            <input type="text" value="-20" placeholder="-20" id="light1z">
+          <div class="ui segment">
+            <div class="ui mini input">
+              X:
+              <input type="text" value="-10" placeholder="-10" id="light1x">
+            </div>
+            <div class="ui mini input">
+              Y:
+              <input type="text" value="4" placeholder="4" id="light1y">
+            </div>
+            <div class="ui mini input">
+              Z:
+              <input type="text" value="-20" placeholder="-20" id="light1z">
+            </div>
           </div>
         </div>
-        <div class="ui divider"></div>
-          <div class="lightchoose">
-            <div class="ui checkbox light">
+        <div class="ui horizontal segments">
+          <div class="ui segment">
+            <div class="ui checkbox light" id="lightpenel">
               <input type="checkbox" checked id="2">
-              <label>Fill Light</label>
+              <label>Fill Light    </label>
             </div>
-            <div class="ui input">
+          </div>
+          <div class="ui segment">
+            <div class="ui mini input">
+              X:
               <input type="text" value="90" placeholder="90" id="light2x">
             </div>
-            <div class="ui input">
+            <div class="ui mini input">
+              Y:
               <input type="text" value="-80" placeholder="80" id="light2y">
             </div>
-            <div class="ui input">
+            <div class="ui mini input">
+              Z:
               <input type="text" value="-60" placeholder="-60" id="light2z">
             </div>
           </div>
-        <div class="ui divider"></div>
-          <div class="lightchoose">
-            <div class="ui checkbox light">
+        </div>
+        <div class="ui horizontal segments">
+          <div class="ui segment">
+            <div class="ui checkbox light" id="lightpenel">
               <input type="checkbox" checked id="3">
               <label>Back Light</label>
             </div>
-            <div class="ui input">
+          </div>
+          <div class="ui segment">
+            <div class="ui mini input">
+              X:
               <input type="text"  value="100" placeholder="100" id="light3x">
             </div>
-            <div class="ui input">
+            <div class="ui mini input">
+              Y:
               <input type="text" value="40" placeholder="40" id="light3y">
             </div>
-            <div class="ui input">
+            <div class="ui mini input">
+              Z:
               <input type="text" value="-200" placeholder="-200" id="light3z">
             </div>
           </div>
+        </div>
       </div>
     </div>
     <div class="ui divider"></div>
@@ -276,6 +301,7 @@
   varying vec3 n;
 
 	void main(void) {
+
     vec4 pos = vec4(aVertexPosition, 1.0);
     e = normalize(vec3(uMVMatrix * vec4(aVertexPosition, 1.0)));
 		n = normalize( uNMatrix * aVertexNormal );
@@ -286,13 +312,9 @@
   precision mediump float;
   uniform sampler2D uSampler;
 
-  varying vec3 e;
-  varying vec3 n;
+	varying vec2 vN;
 
   void main(void) {
-    vec3 r = reflect( e, n );
-    float m = 2. * sqrt( pow( r.x, 2. ) + pow( r.y, 2. ) + pow( r.z + 1., 2. ) );
-    vec2 vN = r.xy / m + .5;
 
     vec3 base = texture2D( uSampler, vN ).rgb;
     gl_FragColor = vec4( base, 1. );
@@ -473,7 +495,7 @@
     void main(void) {
         vVertexNormal = aVertexNormal;
         vTextureCoord = aTextureCoord;
-        vVertexPosition = aVertexPosition;
+        //vVertexPosition = aVertexPosition;
         vVertexPosition = (uMVMatrix * vec4(aVertexPosition, 1.0)).xyz;
 
         vVertexFrontColor = aVertexFrontColor;
