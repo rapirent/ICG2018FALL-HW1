@@ -21,11 +21,14 @@ var renderAgain = false;
 var animRequest = null;
 var gl;
 var shaders = {}
+var materialShininess = 32.0;
 
 function updateRenderer() {
   console.log('stop')
   cancelAnimationFrame(animRequest)
-  initSetting();
+  if (!remainingSetteing) {
+    initSetting();
+  }
   then();
 }
 
@@ -76,25 +79,33 @@ var animateSetting = {
   yAngle: 180
 }
 var useTextureSetting = [true, true, true]
-var scaleFactor = {
+var scaleFactor = [{
+  xFactor: 2,
+  yFactor: 2,
+  zFactor: 2
+},{
   xFactor: 1,
   yFactor: 1,
   zFactor: 1
-}
+},{
+  xFactor: 2,
+  yFactor: 2,
+  zFactor: 2
+}]
 var isLightShow = [true, true, true]
 function initSetting() {
   transFactors = [{
-    xFactor: -40,
+    xFactor: -20,
     yFactor: 5,
-    zFactor: -20,
+    zFactor: 0,
   },{
     xFactor: 0,
     yFactor: 5,
     zFactor: 0,
   },{
-    xFactor: 40,
+    xFactor: 20,
     yFactor: 5,
-    zFactor: -20,
+    zFactor: 0,
   }]
   shearFactor = [{xFactor: 0,yFactor: 0, zFactor: 0,},{xFactor: 0,yFactor: 0,zFactor: 0,},{xFactor: 0,yFactor: 0,zFactor: 0,}]
   animateSetting = {
@@ -104,19 +115,22 @@ function initSetting() {
     yAngle: 180
   }
   scaleFactor = [{
-    xFactor: 1,
-    yFactor: 1,
-    zFactor: 1
+    xFactor: 2,
+    yFactor: 2,
+    zFactor: 2
   },{
     xFactor: 1,
     yFactor: 1,
     zFactor: 1
   },{
-    xFactor: 1,
-    yFactor: 1,
-    zFactor: 1
+    xFactor: 2,
+    yFactor: 2,
+    zFactor: 2
   }]
+  materialShininess = 32.0
+  $('#shininess-range').range('set value', 32.0);
 }
+var remainingSetteing = false;
 function initGL(canvas) {
   try {
     gl = canvas.getContext("webgl") || canvas.getContext('experimental-webgl');
@@ -260,7 +274,7 @@ function createBuffers(loadedData) {
     textureCoordBuffer.itemSize = 2;
     textureCoordBuffer.numItems = loadedData.vertexTextureCoords.length / 2;
   } else {
-    console.log('No vertex texture coords')
+    alert('No vertex texture coords')
   }
 
   var positionBuffer = gl.createBuffer();
@@ -308,7 +322,7 @@ function setViewPort() {
 }
 
 function updateMVMatrix(number) {
-  mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 2000.0);
+  mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 5000.0);
   mat4.identity(mvMatrix);
   mat4.translate(mvMatrix, mvMatrix, [0, 0, -40]);
   mat4.scale(
@@ -416,7 +430,7 @@ function updateAttributesAndUniforms(selectdName, buffers, texture, number) {
   //   lightLocationArray.push(parseFloat(document.getElementById("lightPositionZ-" + i).value));
   //   lightEnabledArray.push(Boolean(document.getElementById('lightPoint-' + i + '-enable').checked) ? 1.0 : 0.0);
   // }
-  gl.uniform1f(selectedProgram.shininess, 32.0 );
+  gl.uniform1f(selectedProgram.shininess, parseFloat(materialShininess) );
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.index);
   //課本6.8.3 N = (M^T)^(-1)
   var normalMatrix = mat3.create()
@@ -744,6 +758,7 @@ async function start_and() {
   shaders['sem-vertex-'] = await initShaders('sem-vertex-')
   shaders['sem-fragment-'] = await  initShaders('sem-fragment-')
   shaders['cel-'] = await initShaders('cel-')
+  shaders['blinn-phong-'] = await initShaders('blinn-phong-')
   then()
 }
 async function then() {
@@ -818,7 +833,6 @@ window.onload = function webGLStart() {
         console.log(startAnimate)
         startAnimate = !startAnimate;
       }})
-  initSetting();
   shaders['flat-'] = initShaders('flat-')
   shaders['gouraud-'] = initShaders('gouraud-')
   shaders['phong-'] = initShaders('phong-')
@@ -875,22 +889,42 @@ function hexToRgbA(hex){
   }
   throw new Error('Bad Hex');
 }
-$('.ui.dropdown').dropdown();
-$('.checkbox.light').checkbox().checkbox({
-  onChecked: function() {
-    console.log(parseInt($(this).attr('id')) - 1)
-    isLightShow[parseInt($(this).attr('id')) - 1] = true
-  },
-  onUnchecked: function() {
-    isLightShow[parseInt($(this).attr('id')) - 1] = false
-  }
-})
-$('.checkbox.object').checkbox().checkbox({
-  onChecked: function() {
-    console.log(parseInt($(this).attr('id')) - 1)
-    selectSetting[parseInt($(this).attr('id')) - 1] = true
-  },
-  onUnchecked: function() {
-    selectSetting[parseInt($(this).attr('id')) - 1] = false
-  }
+$(document).ready( function() {
+  $('.ui.dropdown').dropdown();
+  $('.checkbox.light').checkbox().checkbox({
+    onChecked: function() {
+      console.log(parseInt($(this).attr('id')) - 1)
+      isLightShow[parseInt($(this).attr('id')) - 1] = true
+    },
+    onUnchecked: function() {
+      isLightShow[parseInt($(this).attr('id')) - 1] = false
+    }
+  })
+  $('.checkbox.object').checkbox().checkbox({
+    onChecked: function() {
+      console.log(parseInt($(this).attr('id')) - 1)
+      selectSetting[parseInt($(this).attr('id')) - 1] = true
+    },
+    onUnchecked: function() {
+      selectSetting[parseInt($(this).attr('id')) - 1] = false
+    }
+  })
+  $('.checkbox.re-render-setting').checkbox().checkbox({
+    onChecked: function() {
+      remainingSetteing = true
+    },
+    onUnchecked: function() {
+      remainingSetteing = false
+    }
+  })
+  $('#shininess-range').range({
+    min: 0,
+    max: 600,
+    start: 32,
+    onChange: function(val) {
+      console.log(materialShininess)
+      $('#shininess-value').text(val)
+      materialShininess = val;
+    }
+  });
 })

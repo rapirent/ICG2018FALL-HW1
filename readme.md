@@ -5,3 +5,4 @@ https://css-tricks.com/snippets/javascript/javascript-keycodes/
 https://www.clicktorelease.com/code/spherical-environment-mapping/
 
 http://in2gpu.com/2014/06/23/toon-shading-effect-and-simple-contour-detection/
+https://github.com/aakshayy/toonshader-webgl

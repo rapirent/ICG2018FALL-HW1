@@ -4,7 +4,7 @@
 .panel {
   /* float: left; */
   /* position: absolute; */
-  text-align: center;
+  /* text-align: center; */
 
   margin: 0px auto;
   Display: table-cell;
@@ -25,5 +25,8 @@
 }
 #lightpenel {
   width: 150px;
+}
+#shininess-range {
+  /* width: 200px; */
 }
 

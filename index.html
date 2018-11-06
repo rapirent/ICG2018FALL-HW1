@@ -1,17 +1,18 @@
 <html>
 
 <head>
-<title>ICG WebGL &mdash; HW1</title>
-<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<title>ICG WebGL HW1</title>
 <link rel="stylesheet" href="css/semantic.min.css">
 <link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/range.css">
 <script type="text/javascript" src="js/gl-matrix-min.js"></script>
 <script type="text/javascript" src="js/webgl-utils.js"></script>
 <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
 <script type="text/javascript" src="js/semantic.min.js"></script>
 <script type="text/javascript" src="js/jscolor.js"></script>
+<script type="text/javascript" src="js/range.js"></script>
 <body>
-    <canvas id="canvas" style="border: none;" width="1300" height="400"></canvas>
+    <canvas id="canvas" style="border: none;" width="1200" height="400"></canvas>
     <div class="render block">
       <div class="panel">
         <div class="ui horizontal segments" id="noshadow">
@@ -27,12 +28,18 @@
                   <div class="item" data-value="galvanizedTexture.jpg">galvanizedTexture</div>
                   <div class="item" data-value="moon.gif">moon</div>
                   <div class="item" data-value="red.jpg">red</div>
-                  <div class="item" data-value="frontcolor">Item Front Color</div>
                   <div class="item" data-value="matcap.jpg">matte red</div>
                   <div class="item" data-value="matcap2.jpg">shinny black</div>
                   <div class="item" data-value="matcap3.jpg">skin</div>
+                  <div class="item" data-value="frontcolor">Item Front Color</div>
                 </div>
               </div>
+            </div>
+            <br>
+            <br>
+            <div class="ui checkbox re-render-setting">
+              <input type="checkbox" id="1">
+              <label>remain setting?</label>
             </div>
           </div>
           <div class="ui segment">
@@ -59,12 +66,13 @@
               <i class="dropdown icon"></i>
               <div class="default text">select #1 shading</div>
               <div class="menu">
-                  <div class="item" data-value="flat-">flat</div>
-                  <div class="item" data-value="gouraud-">gouraud</div>
-                  <div class="item" data-value="phong-">phong</div>
-                  <div class="item" data-value="sem-vertex-">spherical enviorment per vertex</div>
-                  <div class="item" data-value="sem-fragment-">spherical enviorment per fragment</div>
-                  <div class="item" data-value="cel-">cel (toon)</div>
+                <div class="item" data-value="flat-">flat</div>
+                <div class="item" data-value="gouraud-">gouraud</div>
+                <div class="item" data-value="phong-">phong</div>
+                <div class="item" data-value="sem-vertex-">spherical enviorment per vertex</div>
+                <div class="item" data-value="sem-fragment-">spherical enviorment per fragment</div>
+                <div class="item" data-value="cel-">cel (toon)</div>
+                <div class="item" data-value="blinn-phong-">blinn phong</div>
               </div>
             </div>
           </div>
@@ -88,7 +96,7 @@
               </div>
             </div>
             <div class="ui dropdown" style="position: relative;">
-              <input type="hidden" value="cel-" id="shading2">
+              <input type="hidden" value="gouraud-" id="shading2">
               <i class="dropdown icon"></i>
               <div class="default text">select #2 shading</div>
               <div class="menu">
@@ -98,6 +106,7 @@
                 <div class="item" data-value="sem-vertex-">spherical enviorment per vertex</div>
                 <div class="item" data-value="sem-fragment-">spherical enviorment per fragment</div>
                 <div class="item" data-value="cel-">cel (toon)</div>
+                <div class="item" data-value="blinn-phong-">blinn phong</div>
               </div>
             </div>
           </div>
@@ -125,12 +134,13 @@
               <i class="dropdown icon"></i>
               <div class="default text">select #3 shading</div>
               <div class="menu">
-                  <div class="item" data-value="flat-">flat</div>
-                  <div class="item" data-value="gouraud-">gouraud</div>
-                  <div class="item" data-value="phong-">phong</div>
-                  <div class="item" data-value="sem-vertex-">spherical enviorment per vertex</div>
-                  <div class="item" data-value="sem-fragment-">spherical enviorment per fragment</div>
-                  <div class="item" data-value="cel-">cel (toon)</div>
+                <div class="item" data-value="flat-">flat</div>
+                <div class="item" data-value="gouraud-">gouraud</div>
+                <div class="item" data-value="phong-">phong</div>
+                <div class="item" data-value="sem-vertex-">spherical enviorment per vertex</div>
+                <div class="item" data-value="sem-fragment-">spherical enviorment per fragment</div>
+                <div class="item" data-value="cel-">cel (toon)</div>
+                <div class="item" data-value="blinn-phong-">blinn phong</div>
               </div>
             </div>
           </div>
@@ -239,41 +249,134 @@
       </div>
     </div>
     <div class="ui divider"></div>
-    <div class="materialColor block">
-      <div class="panel materialAmbient">
-        <button class="ui button" id="materialAmbient-button">abmient material color</button>
-        <table>
-          <tr><th>RGB</th><td><input id="materialAmbient-rgb" onchange="setString('materialAmbient', this.value)" /></td></tr>
-          <tr><th>HEX</th><td><input id="materialAmbient-hex" onchange="setString('materialAmbient', this.value)" /></td></tr>
-          <tr class="red"><th>R</th><td><input id="materialAmbient-red" class="short" onchange="setRGB('materialAmbient', this.value, null, null)" /></td></tr>
-          <tr class="grn"><th>G</th><td><input id="materialAmbient-grn" class="short" onchange="setRGB('materialAmbient', null, this.value, null)" /></td></tr>
-          <tr class="blu"><th>B</th><td><input id="materialAmbient-blu" class="short" onchange="setRGB('materialAmbient', null, null, this.value)" /></td></tr>
-        </table>
+    <div class="ui materialColor block horizontal segments">
+      <div class="ui segment" style="width: 250px;">
+        <div class="panel materialAmbient">
+          <button class="ui button" id="materialAmbient-button">abmient material color</button>
+          <table>
+            <tr><th>RGB</th><td><input id="materialAmbient-rgb" onchange="setString('materialAmbient', this.value)" /></td></tr>
+            <tr><th>HEX</th><td><input id="materialAmbient-hex" onchange="setString('materialAmbient', this.value)" /></td></tr>
+            <tr class="red"><th>R</th><td><input id="materialAmbient-red" class="short" onchange="setRGB('materialAmbient', this.value, null, null)" /></td></tr>
+            <tr class="grn"><th>G</th><td><input id="materialAmbient-grn" class="short" onchange="setRGB('materialAmbient', null, this.value, null)" /></td></tr>
+            <tr class="blu"><th>B</th><td><input id="materialAmbient-blu" class="short" onchange="setRGB('materialAmbient', null, null, this.value)" /></td></tr>
+          </table>
+        </div>
+        <div class="panel materialDiffuse">
+          <button class="ui button" id="materialDiffuse-button">diffuse material color</button>
+          <table>
+            <tr><th>RGB</th><td><input id="materialDiffuse-rgb" onchange="setString('materialDiffuse', this.value)" /></td></tr>
+            <tr><th>HEX</th><td><input id="materialDiffuse-hex" onchange="setString('materialDiffuse', this.value)" /></td></tr>
+            <tr class="red"><th>R</th><td><input id="materialDiffuse-red" class="short" onchange="setRGB('materialDiffuse', this.value, null, null)" /></td></tr>
+            <tr class="grn"><th>G</th><td><input id="materialDiffuse-grn" class="short" onchange="setRGB('materialDiffuse', null, this.value, null)" /></td></tr>
+            <tr class="blu"><th>B</th><td><input id="materialDiffuse-blu" class="short" onchange="setRGB('materialDiffuse', null, null, this.value)" /></td></tr>
+          </table>
+        </div>
+        <div class="panel materialSpecular">
+          <button class="ui button" id="materialSpecular-button">specular material color</button>
+          <table>
+            <tr><th>RGB</th><td><input id="materialSpecular-rgb" onchange="setString('materialSpecular', this.value)" /></td></tr>
+            <tr><th>HEX</th><td><input id="materialSpecular-hex" onchange="setString('materialSpecular', this.value)" /></td></tr>
+            <tr class="red"><th>R</th><td><input id="materialSpecular-red" class="short" onchange="setRGB('materialSpecular', this.value, null, null)" /></td></tr>
+            <tr class="grn"><th>G</th><td><input id="materialSpecular-grn" class="short" onchange="setRGB('materialSpecular', null, this.value, null)" /></td></tr>
+            <tr class="blu"><th>B</th><td><input id="materialSpecular-blu" class="short" onchange="setRGB('materialSpecular', null, null, this.value)" /></td></tr>
+          </table>
+        </div>
       </div>
-      <div class="panel materialDiffuse">
-        <button class="ui button" id="materialDiffuse-button">diffuse material color</button>
-        <table>
-          <tr><th>RGB</th><td><input id="materialDiffuse-rgb" onchange="setString('materialDiffuse', this.value)" /></td></tr>
-          <tr><th>HEX</th><td><input id="materialDiffuse-hex" onchange="setString('materialDiffuse', this.value)" /></td></tr>
-          <tr class="red"><th>R</th><td><input id="materialDiffuse-red" class="short" onchange="setRGB('materialDiffuse', this.value, null, null)" /></td></tr>
-          <tr class="grn"><th>G</th><td><input id="materialDiffuse-grn" class="short" onchange="setRGB('materialDiffuse', null, this.value, null)" /></td></tr>
-          <tr class="blu"><th>B</th><td><input id="materialDiffuse-blu" class="short" onchange="setRGB('materialDiffuse', null, null, this.value)" /></td></tr>
-        </table>
-      </div>
-      <div class="panel materialSpecular">
-        <button class="ui button" id="materialSpecular-button">specular material color</button>
-        <table>
-          <tr><th>RGB</th><td><input id="materialSpecular-rgb" onchange="setString('materialSpecular', this.value)" /></td></tr>
-          <tr><th>HEX</th><td><input id="materialSpecular-hex" onchange="setString('materialSpecular', this.value)" /></td></tr>
-          <tr class="red"><th>R</th><td><input id="materialSpecular-red" class="short" onchange="setRGB('materialSpecular', this.value, null, null)" /></td></tr>
-          <tr class="grn"><th>G</th><td><input id="materialSpecular-grn" class="short" onchange="setRGB('materialSpecular', null, this.value, null)" /></td></tr>
-          <tr class="blu"><th>B</th><td><input id="materialSpecular-blu" class="short" onchange="setRGB('materialSpecular', null, null, this.value)" /></td></tr>
-        </table>
+      <div class="ui segment">
+        <b>shininess</b>
+        <p id="shininess-value">32</p>
+        <div class="ui range" id="shininess-range"></div>
       </div>
     </div>
 
 
 </body>
+<script id="blinn-phong-fragmentShader" type="x-shader/x-fragment">
+  precision highp float;
+  uniform mat3 uNMatrix;
+  uniform vec3 uMaterialAmbient;
+  uniform vec3 uMaterialDiffuse;
+  uniform vec3 uMaterialSpecular;
+  uniform vec3 uAmbient;
+  uniform vec3 uDiffuse;
+  uniform vec3 uSpecular;
+  uniform float uShininess;
+  uniform vec4 lightPositions[3];
+  uniform mat4 uMVMatrix;
+  uniform sampler2D uSampler;
+  uniform bool uIsLightShow[3];
+  uniform bool uIfUseTexture;
+
+  varying vec3 vVertexPosition;
+  varying vec2 vTextureCoord;
+  varying vec3 vVertexNormal;
+  varying vec3 vVertexFrontColor;
+
+
+  void main(void) {
+      vec3 eyeDirection = normalize(-vVertexPosition);
+      vec3 pos = (uMVMatrix * vec4(vVertexPosition, 1.0)).xyz;
+
+      //單位法向量
+      vec3 normal = normalize(uNMatrix * vVertexNormal);
+      vec3 lightWeighting = vec3(0.0,0.0,0.0);
+      for(int i = 0; i<3; i++) {
+        if (uIsLightShow[i]) {
+          //光的方向
+          vec3 L = normalize(lightPositions[i].xyz - vVertexPosition);
+          //半角公式
+          vec3 H = normalize(L + eyeDirection);
+
+          //specular weight
+          vec3 reflectionDirection = reflect(-L, normal);
+          float specularWeight = pow(max(dot(H, normal),0.0),uShininess);
+          vec3 specular = specularWeight * (uSpecular*uMaterialSpecular);
+
+          //diffuse weight
+          float diffuseWeight = max(dot(normal, L), 0.0);
+          vec3 diffuse = diffuseWeight * (uDiffuse*uMaterialDiffuse);
+          lightWeighting += uAmbient*uMaterialAmbient + specular + diffuse;
+        }
+      }
+      vec4 fragcolor;
+      if (uIfUseTexture) {
+        fragcolor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+      }
+      else {
+        fragcolor = vec4(vVertexFrontColor, 1.0);
+      }
+      gl_FragColor = vec4(fragcolor.rgb * lightWeighting, fragcolor.a);
+  }
+</script>
+
+<script id="blinn-phong-vertexShader" type="x-shader/x-vertex">
+    precision highp float;
+
+    attribute vec3 aVertexPosition;
+    attribute vec3 aVertexNormal;
+    attribute vec2 aTextureCoord;
+    attribute vec3 aVertexFrontColor;
+
+    uniform vec4 lightPositions[3];
+    uniform mat3 uNMatrix;
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+
+    varying vec3 vVertexPosition;
+    varying vec2 vTextureCoord;
+    varying vec3 vVertexNormal;
+    varying vec3 vVertexFrontColor;
+
+    void main(void) {
+        vVertexNormal = aVertexNormal;
+        vTextureCoord = aTextureCoord;
+        //vVertexPosition = aVertexPosition;
+        vVertexPosition = (uMVMatrix * vec4(aVertexPosition, 1.0)).xyz;
+
+        vVertexFrontColor = aVertexFrontColor;
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+    }
+</script>
 <script id="cel-fragmentShader" type="x-shader/x-fragment">
   precision highp float;
   uniform mat3 uNMatrix;
