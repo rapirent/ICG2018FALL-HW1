@@ -20,6 +20,7 @@ window.cancelRequestAnimFrame = (function(){
 var renderAgain = false;
 var animRequest = null;
 var gl;
+var shaders = {}
 
 function updateRenderer() {
   console.log('stop')
@@ -137,7 +138,7 @@ function initGL(canvas) {
 function getShader(gl, id) {
     var shaderScript = document.getElementById(id);
     if (!shaderScript) {
-        alert("can't find shader script")
+        alert("can't find shader script" + id)
         return null;
     }
 
@@ -175,26 +176,30 @@ function getShader(gl, id) {
 }
 
 function initShaders(shading) {
-  console.log('loading shading...' + shading)
-  var fragmentShader = getShader(gl, shading + "fragmentShader");
-  var vertexShader = getShader(gl, shading + "vertexShader");
-  var shaderProgram = gl.createProgram();
+  return new Promise(function(resolve, reject) {
+    console.log('loading shading...' + shading)
+    var fragmentShader = getShader(gl, shading + "fragmentShader");
+    var vertexShader = getShader(gl, shading + "vertexShader");
+    var shaderProgram = gl.createProgram();
 
-  gl.attachShader(shaderProgram, vertexShader);
-  gl.attachShader(shaderProgram, fragmentShader);
-  gl.linkProgram(shaderProgram);
-  // console.log(vertexShader,fragmentShader,shaderProgram)
-  if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-    console.log(vertexShader,fragmentShader,shaderProgram)
-    console.log(gl.getProgramInfoLog(shaderProgram))
-    alert("Could not initialize shaders");
-  }
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+    gl.deleteShader(vertexShader);
+    gl.deleteShader(fragmentShader);
+    // console.log(vertexShader,fragmentShader,shaderProgram)
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+      console.log(vertexShader,fragmentShader,shaderProgram)
+      console.log(gl.getProgramInfoLog(shaderProgram))
+      alert("Could not initialize shaders");
+    }
 
-  gl.useProgram(shaderProgram);
-  gl.enable(gl.DEPTH_TEST);
-  createLocations(shaderProgram);
+    gl.useProgram(shaderProgram);
+    gl.enable(gl.DEPTH_TEST);
+    createLocations(shaderProgram);
 
-  return shaderProgram
+    resolve(shaderProgram)
+  })
 }
 
 function createLocations(selectedProgram) {
@@ -278,7 +283,7 @@ function createBuffers(loadedData) {
     vertexFrontColorBuffer.itemSize = 3;
     vertexFrontColorBuffer.numItems = loadedData.vertexFrontColors.length / 3;
   } else {
-    console.log('No vertex texture colors')
+    console.log('No vertex front colors')
   }
 
 
@@ -325,19 +330,21 @@ function updateMVMatrix(number) {
   mat4.rotateX(mvMatrix, mvMatrix, degToRad(animateSetting.xAngle))
   mat4.rotateY(mvMatrix, mvMatrix, degToRad(animateSetting.yAngle));
 }
-function updateAttributesAndUniforms(selectedProgram, buffers, texture, number) {
+function updateAttributesAndUniforms(selectdName, buffers, texture, number) {
+  var selectedProgram = shaders[selectdName];
   gl.useProgram(selectedProgram);
   if (!buffers ||
-    buffers.position == null ||
-    buffers.normal == null ||
-    buffers.textureCoord == null ||
-    buffers.index == null
+    buffers.position === null ||
+    buffers.normal === null ||
+    buffers.textureCoord === null ||
+    buffers.index === null
   ) {
     console.log(buffers)
     return;
   }
-
-  gl.bindTexture(gl.TEXTURE_2D, texture);
+  if (texture) {
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+  }
   gl.uniform1i(selectedProgram.samplerUniform, 0);
   updateMVMatrix(number);
   //console.log(mvMatrix)
@@ -499,14 +506,14 @@ async function animate() {
     lastTime = timeNow;
 }
 
-function tick(shaders,buffersArray,texture) {
+function tick(shadersSelection,buffersArray,texture) {
   animRequest = requestAnimFrame(function(){
-    tick(shaders,buffersArray,texture)
+    tick(shadersSelection,buffersArray,texture)
   });
   setViewPort();
-  updateAttributesAndUniforms(shaders[0],buffersArray[0],texture,0);
-  updateAttributesAndUniforms(shaders[1],buffersArray[1],texture,1);
-  updateAttributesAndUniforms(shaders[2],buffersArray[2],texture,2);
+  updateAttributesAndUniforms(shadersSelection[0],buffersArray[0],texture,0);
+  updateAttributesAndUniforms(shadersSelection[1],buffersArray[1],texture,1);
+  updateAttributesAndUniforms(shadersSelection[2],buffersArray[2],texture,2);
   animate();
 }
 
@@ -719,7 +726,7 @@ async function handelKeyEvent(event) {
 }
 
 
-async function start(url){
+function start(url){
   return new Promise(function(resolve, reject) {
     console.log(url)
     var loadedData;
@@ -730,31 +737,43 @@ async function start(url){
     })
   })
 }
+async function start_and() {
+  shaders['flat-'] = await initShaders('flat-')
+  shaders['gouraud-'] = await initShaders('gouraud-')
+  shaders['phong-'] = await initShaders('phong-')
+  shaders['sem-vertex-'] = await initShaders('sem-vertex-')
+  shaders['sem-fragment-'] = await  initShaders('sem-fragment-')
+  shaders['cel-'] = await initShaders('cel-')
+  then()
+}
 async function then() {
   await console.log($('#object1').val(),$('#object2').val(),$('#object3').val())
   var data1 = await start('data/'+ $('#object1').val() + '.json'),
     data2 = await start('data/'+ $('#object2').val() + '.json'),
     data3 = await start('data/'+ $('#object3').val() + '.json');
   var datas = [data1,data2,data3];
-  var texture = initTextures($('#texture').val())
+  var texture;
   if ($('#texture').val()=='frontcolor') {
     useTextureSetting = [false, false, false]
+    texture = null;
   }
-  var shaders = [
-    initShaders($('#shading1').val()),
-    initShaders($('#shading2').val()),
-    initShaders($('#shading3').val())
-  ]
+  else {
+    texture = initTextures($('#texture').val())
+  }
   var buffersArray = []
   if (datas != null) {
     for (var i =0; i<datas.length; i++) {
       buffersArray.push(createBuffers(datas[i]))
     }
   }
+  var shadersSelection = []
+  for (var i = 1; i<4; i++) {
+    shadersSelection.push($('#shading' + i).val())
+  }
   console.log(buffersArray)
   gl.clearColor(0.0, 0.2, 0.2, 1.0);
   gl.enable(gl.DEPTH_TEST);
-  tick(shaders,buffersArray,texture)
+  tick(shadersSelection,buffersArray,texture)
 }
 
 window.onload = function webGLStart() {
@@ -800,7 +819,13 @@ window.onload = function webGLStart() {
         startAnimate = !startAnimate;
       }})
   initSetting();
-  then();
+  shaders['flat-'] = initShaders('flat-')
+  shaders['gouraud-'] = initShaders('gouraud-')
+  shaders['phong-'] = initShaders('phong-')
+  shaders['sem-vertex-'] =  initShaders('sem-vertex-')
+  shaders['sem-fragment-'] =  initShaders('sem-vertex-')
+  shaders['cel-'] = initShaders('cel-')
+  start_and();
 }
 
 var options = {

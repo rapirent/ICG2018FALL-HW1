@@ -64,6 +64,7 @@
                   <div class="item" data-value="phong-">phong</div>
                   <div class="item" data-value="sem-vertex-">spherical enviorment per vertex</div>
                   <div class="item" data-value="sem-fragment-">spherical enviorment per fragment</div>
+                  <div class="item" data-value="cel-">cel (toon)</div>
               </div>
             </div>
           </div>
@@ -87,7 +88,7 @@
               </div>
             </div>
             <div class="ui dropdown" style="position: relative;">
-              <input type="hidden" value="gouraud-" id="shading2">
+              <input type="hidden" value="cel-" id="shading2">
               <i class="dropdown icon"></i>
               <div class="default text">select #2 shading</div>
               <div class="menu">
@@ -96,6 +97,7 @@
                 <div class="item" data-value="phong-">phong</div>
                 <div class="item" data-value="sem-vertex-">spherical enviorment per vertex</div>
                 <div class="item" data-value="sem-fragment-">spherical enviorment per fragment</div>
+                <div class="item" data-value="cel-">cel (toon)</div>
               </div>
             </div>
           </div>
@@ -128,6 +130,7 @@
                   <div class="item" data-value="phong-">phong</div>
                   <div class="item" data-value="sem-vertex-">spherical enviorment per vertex</div>
                   <div class="item" data-value="sem-fragment-">spherical enviorment per fragment</div>
+                  <div class="item" data-value="cel-">cel (toon)</div>
               </div>
             </div>
           </div>
@@ -271,6 +274,102 @@
 
 
 </body>
+<script id="cel-fragmentShader" type="x-shader/x-fragment">
+  precision highp float;
+  uniform mat3 uNMatrix;
+  uniform vec3 uMaterialAmbient;
+  uniform vec3 uMaterialDiffuse;
+  uniform vec3 uMaterialSpecular;
+  uniform vec3 uAmbient;
+  uniform vec3 uDiffuse;
+  uniform vec3 uSpecular;
+  uniform float uShininess;
+  uniform vec4 lightPositions[3];
+  uniform mat4 uMVMatrix;
+  uniform sampler2D uSampler;
+  uniform bool uIsLightShow[3];
+  uniform bool uIfUseTexture;
+
+  varying vec3 vVertexPosition;
+  varying vec2 vTextureCoord;
+  varying vec3 vVertexNormal;
+  varying vec3 vVertexFrontColor;
+
+
+  void main(void) {
+      float levels = 5.0;
+      float scaleFactor = 1.0 / levels;
+      vec3 eyeDirection = normalize(-vVertexPosition);
+      vec3 pos = (uMVMatrix * vec4(vVertexPosition, 1.0)).xyz;
+
+
+      //單位法向量
+      vec3 normal = normalize(uNMatrix * vVertexNormal);
+      vec3 lightWeighting = vec3(0.0,0.0,0.0);
+      for(int i = 0; i<3; i++) {
+        if (uIsLightShow[i]) {
+          //光的方向
+          vec3 L = normalize(lightPositions[i].xyz - vVertexPosition);
+
+          //specular weight
+          vec3 reflectionDirection = reflect(-L, normal);
+          float specularWeight = pow(max(dot(reflectionDirection, eyeDirection),0.0),uShininess);
+          vec3 specular = vec3(0.0,0.0,0.0);
+          if (specularWeight > 0.4) {
+            specular = specularWeight * (uSpecular*uMaterialSpecular);
+          }
+
+          float edgeDetection = dot(normal, L);
+
+          //diffuse weight
+          float diffuseWeight = max(dot(normal, L), 0.0);
+          vec3 diffuse = floor(diffuseWeight*levels) * scaleFactor * (uDiffuse*uMaterialDiffuse);
+          if (edgeDetection > 0.2) {
+            lightWeighting += (uAmbient*uMaterialAmbient + specular + diffuse);
+          }
+        }
+      }
+      vec4 fragcolor;
+      if (uIfUseTexture) {
+        fragcolor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+      }
+      else {
+        fragcolor = vec4(vVertexFrontColor, 1.0);
+      }
+      gl_FragColor = vec4(fragcolor.rgb * lightWeighting, fragcolor.a);
+  }
+</script>
+
+<script id="cel-vertexShader" type="x-shader/x-vertex">
+    precision highp float;
+
+    attribute vec3 aVertexPosition;
+    attribute vec3 aVertexNormal;
+    attribute vec2 aTextureCoord;
+    attribute vec3 aVertexFrontColor;
+
+    uniform vec4 lightPositions[3];
+    uniform mat3 uNMatrix;
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+
+    varying vec3 vVertexPosition;
+    varying vec2 vTextureCoord;
+    varying vec3 vVertexNormal;
+    varying vec3 vVertexFrontColor;
+
+    void main(void) {
+        vVertexNormal = aVertexNormal;
+        vTextureCoord = aTextureCoord;
+        //vVertexPosition = aVertexPosition;
+        vVertexPosition = (uMVMatrix * vec4(aVertexPosition, 1.0)).xyz;
+
+        vVertexFrontColor = aVertexFrontColor;
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+    }
+</script>
+
+
 <script id="sem-fragment-fragmentShader" type="x-shader/x-fragment">
   precision mediump float;
   uniform sampler2D uSampler;
@@ -502,8 +601,6 @@
         gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
     }
 </script>
-
-
 
 <script id="flat-fragmentShader" type="x-shader/x-fragment">
     #extension GL_OES_standard_derivatives : enable
