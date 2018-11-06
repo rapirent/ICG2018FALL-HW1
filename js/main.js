@@ -303,7 +303,7 @@ function setViewPort() {
 }
 //TODO
 function updateMVMatrix(number) {
-  mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 200.0);
+  mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 2000.0);
   mat4.identity(mvMatrix);
   mat4.translate(mvMatrix, mvMatrix, [0, 0, -40]);
   mat4.scale(
@@ -741,9 +741,9 @@ async function then() {
     useTextureSetting = [false, false, false]
   }
   var shaders = [
-    initShaders('flat-'),
-    initShaders('gouraud-'),
-    initShaders('phong-')
+    initShaders($('#shading1').val()),
+    initShaders($('#shading2').val()),
+    initShaders($('#shading3').val())
   ]
   var buffersArray = []
   if (datas != null) {
@@ -864,10 +864,8 @@ $('.checkbox.object').checkbox().checkbox({
   onChecked: function() {
     console.log(parseInt($(this).attr('id')) - 1)
     selectSetting[parseInt($(this).attr('id')) - 1] = true
-    console.log(selectSetting)
   },
   onUnchecked: function() {
     selectSetting[parseInt($(this).attr('id')) - 1] = false
-    console.log(selectSetting)
   }
 })
