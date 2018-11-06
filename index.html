@@ -37,6 +37,8 @@
             </div>
             <br>
             <br>
+            <div class="ui mini basic blue button" onclick="resizeToSame()">Compare Mode</div>
+            <div class="ui mini basic positive button" onclick="initSetting()">resume</div>
             <div class="ui checkbox re-render-setting">
               <input type="checkbox" id="1">
               <label>remain setting?</label>
@@ -47,7 +49,7 @@
               <input type="checkbox" checked id="1">
               <label>Object #1: </label>
             </div>
-            <div class="ui dropdown" style="position: relative;">
+            <div class="ui dropdown button" style="position: relative;">
               <input type="hidden" value="Mig27" id="object1">
               <i class="dropdown icon"></i>
               <div class="default text">select #1 object</div>
@@ -61,7 +63,7 @@
                 <div class="item" data-value="pot.tri">teapot (with color)</div>
               </div>
             </div>
-            <div class="ui dropdown" style="position: relative;">
+            <div class="ui dropdown button" style="position: relative;">
               <input type="hidden" value="flat-" id="shading1">
               <i class="dropdown icon"></i>
               <div class="default text">select #1 shading</div>
@@ -81,7 +83,7 @@
               <input type="checkbox" checked id="2">
               <label>Object #2: </label>
             </div>
-            <div class="ui dropdown" style="position: relative;">
+            <div class="ui dropdown button" style="position: relative;">
               <input type="hidden" value="Teapot" id="object2">
               <i class="dropdown icon"></i>
               <div class="default text">select #2 object</div>
@@ -95,7 +97,7 @@
                 <div class="item" data-value="pot.tri">teapot (with color)</div>
               </div>
             </div>
-            <div class="ui dropdown" style="position: relative;">
+            <div class="ui dropdown button" style="position: relative;">
               <input type="hidden" value="gouraud-" id="shading2">
               <i class="dropdown icon"></i>
               <div class="default text">select #2 shading</div>
@@ -115,7 +117,7 @@
               <input type="checkbox" checked id="3">
               <label>Object #3: </label>
             </div>
-            <div class="ui dropdown" style="position: relative;">
+            <div class="ui dropdown button" style="position: relative;">
               <input type="hidden" value="easter.tri" id="object3">
               <i class="dropdown icon"></i>
               <div class="default text">select #3 object</div>
@@ -129,7 +131,7 @@
                 <div class="item" data-value="pot.tri">teapot (with color)</div>
               </div>
             </div>
-            <div class="ui dropdown" style="position: relative;">
+            <div class="ui dropdown button" style="position: relative;">
               <input type="hidden" value="phong-" id="shading3">
               <i class="dropdown icon"></i>
               <div class="default text">select #3 shading</div>

@@ -31,34 +31,49 @@ function updateRenderer() {
   }
   then();
 }
+function resizeToSame() {
+  scaleFactor = [{
+    xFactor: 1,
+    yFactor: 1,
+    zFactor: 1
+  },{
+    xFactor: 1,
+    yFactor: 1,
+    zFactor: 1
+  },{
+    xFactor: 1,
+    yFactor: 1,
+    zFactor: 1
+  }]
+  transFactors = [{
+      xFactor: -40,
+      yFactor: 0,
+      zFactor: -50,
+    },{
+      xFactor: 0,
+      yFactor: 0,
+      zFactor: -20,
+    },{
+      xFactor: 40,
+      yFactor: 0,
+      zFactor: -50,
+  }]
+}
 
 var transFactors = [{
-    xFactor: -40,
-    yFactor: 5,
-    zFactor: -20,
-  },{
-    xFactor: 0,
-    yFactor: 5,
-    zFactor: 0,
-  },{
-    xFactor: 40,
-    yFactor: 5,
-    zFactor: -20,
+  xFactor: -20,
+  yFactor: 5,
+  zFactor: 0,
+},{
+  xFactor: 0,
+  yFactor: 5,
+  zFactor: 0,
+},{
+  xFactor: 20,
+  yFactor: 5,
+  zFactor: 0,
 }]
 var selectSetting = [true, true, true]
-// var transFactors = [{
-//   xFactor: -20,
-//   yFactor: 0,
-//   zFactor: -15,
-// },{
-//   xFactor: 0,
-//   yFactor: 0,
-//   zFactor: -5,
-// },{
-//   xFactor: 20,
-//   yFactor: 0,
-//   zFactor: -15,
-// }]
 var shearFactor = [{
   xFactor: 0,
   yFactor: 0,
