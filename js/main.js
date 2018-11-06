@@ -356,7 +356,7 @@ function updateAttributesAndUniforms(selectdName, buffers, texture, number) {
     console.log(buffers)
     return;
   }
-  if (texture) {
+  if (texture!==null) {
     gl.bindTexture(gl.TEXTURE_2D, texture);
   }
   gl.uniform1i(selectedProgram.samplerUniform, 0);
@@ -773,6 +773,7 @@ async function then() {
     texture = null;
   }
   else {
+    useTextureSetting = [true, true, true]
     texture = initTextures($('#texture').val())
   }
   var buffersArray = []
