@@ -301,7 +301,7 @@ function setViewPort() {
   gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 }
-//TODO
+
 function updateMVMatrix(number) {
   mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 2000.0);
   mat4.identity(mvMatrix);
