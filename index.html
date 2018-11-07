@@ -38,11 +38,17 @@
             </div>
             <br>
             <br>
-            <div class="ui mini basic blue button" onclick="resizeToSame()">Compare Mode</div>
-            <div class="ui mini basic positive button" onclick="initSetting()">resume</div>
+            <div class="ui mini basic blue button" onclick="resizeToSame()">Compare</div>
+            <div class="ui mini basic positive button" onclick="initSetting()">Resume</div>
             <div class="ui checkbox re-render-setting">
               <input type="checkbox" id="1">
               <label>remain setting?</label>
+            </div>
+            <br>
+            <br>
+            <div class="ui checkbox rotate-view">
+              <input type="checkbox" id="1">
+              <label>Rotate View?</label>
             </div>
           </div>
           <div class="ui segment">
@@ -64,7 +70,7 @@
                 <div class="item" data-value="pot.tri">teapot (with color)</div>
               </div>
             </div>
-            <div class="ui dropdown button" style="position: relative;">
+            <div class="ui dropdown button" style="position: relative;" id="shadingSelect1">
               <input type="hidden" value="flat-" id="shading1">
               <i class="dropdown icon"></i>
               <div class="default text">select #1 shading</div>
@@ -77,6 +83,11 @@
                 <div class="item" data-value="cel-">cel (toon)</div>
                 <div class="item" data-value="blinn-phong-">blinn phong</div>
               </div>
+            </div>
+            <div class="ui segment levels-1" id="noshadow">
+              <b>levels</b>
+              <p id="levels-1-value">5</p>
+              <div class="ui range" id="levels-1"></div>
             </div>
           </div>
           <div class="ui segment">
@@ -98,7 +109,7 @@
                 <div class="item" data-value="pot.tri">teapot (with color)</div>
               </div>
             </div>
-            <div class="ui dropdown button" style="position: relative;">
+            <div class="ui dropdown button" style="position: relative;" id="shadingSelect2">
               <input type="hidden" value="gouraud-" id="shading2">
               <i class="dropdown icon"></i>
               <div class="default text">select #2 shading</div>
@@ -111,6 +122,11 @@
                 <div class="item" data-value="cel-">cel (toon)</div>
                 <div class="item" data-value="blinn-phong-">blinn phong</div>
               </div>
+            </div>
+            <div class="ui segment levels-2" id="noshadow">
+              <b>levels</b>
+              <p id="levels-2-value">5</p>
+              <div class="ui range" id="levels-2"></div>
             </div>
           </div>
           <div class="ui segment">
@@ -132,7 +148,7 @@
                 <div class="item" data-value="pot.tri">teapot (with color)</div>
               </div>
             </div>
-            <div class="ui dropdown button" style="position: relative;">
+            <div class="ui dropdown button" style="position: relative;" id="shadingSelect3">
               <input type="hidden" value="phong-" id="shading3">
               <i class="dropdown icon"></i>
               <div class="default text">select #3 shading</div>
@@ -145,6 +161,11 @@
                 <div class="item" data-value="cel-">cel (toon)</div>
                 <div class="item" data-value="blinn-phong-">blinn phong</div>
               </div>
+            </div>
+            <div class="ui segment levels-3" id="noshadow">
+              <b>levels</b>
+              <p id="levels-3-value">5</p>
+              <div class="ui range" id="levels-3"></div>
             </div>
           </div>
         </div>

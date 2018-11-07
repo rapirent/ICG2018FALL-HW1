@@ -22,7 +22,11 @@ var animRequest = null;
 var gl;
 var shaders = {}
 var materialShininess = 32.0;
-
+var radius = 30;
+var up = [0, 1, 0];
+var ifRotate = false;
+var cameraAngleRadians = 0;
+var levels = [5,5,5]
 function updateRenderer() {
   console.log('stop')
   cancelAnimationFrame(animRequest)
@@ -144,6 +148,12 @@ function initSetting() {
   }]
   materialShininess = 32.0
   $('#shininess-range').range('set value', 32.0);
+  $('#levels-1').range('set value', 5);
+  $('#levels-2').range('set value', 5);
+  $('#levels-3').range('set value', 5);
+  $('.levels-1').hide()
+  $('.levels-2').hide()
+  $('.levels-3').hide()
 }
 var remainingSetteing = false;
 function initGL(canvas) {
@@ -341,20 +351,41 @@ function setViewPort() {
 }
 
 function updateMVMatrix(number) {
-  mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 5000.0);
+  mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 2000.0);
   mat4.identity(mvMatrix);
-  mat4.translate(mvMatrix, mvMatrix, [0, 0, -40]);
-  mat4.scale(
-    mvMatrix,
-    mvMatrix,
-    [scaleFactor[number].xFactor,scaleFactor[number].yFactor, scaleFactor[number].zFactor]
-  );
+  if (ifRotate) {
+    // mat4.translate(mvMatrix, mvMatrix, [0, 0, 40]);
+    var cameraMatrix = mat4.create()
+    mat4.identity(cameraMatrix);
+    mat4.rotateY(cameraMatrix,cameraMatrix,degToRad(cameraAngleRadians));
+    mat4.translate(cameraMatrix,cameraMatrix, [0, 0,radius * 1.5]);
 
-  mat4.translate(
-    mvMatrix,
-    mvMatrix,
-    [transFactors[number].xFactor, transFactors[number].yFactor, transFactors[number].zFactor]
-  )
+    var viewMatrix = mat4.create()
+    mat4.invert(viewMatrix,cameraMatrix)
+    mat4.multiply(pMatrix,pMatrix,viewMatrix)
+
+    var angle = (number-1) * Math.PI * 2 / 3;
+    var x = Math.cos(angle) * radius;
+    var y = Math.sin(angle) * radius;
+
+    mat4.translate(
+      mvMatrix,
+      mvMatrix,
+      [x,0, y]
+    )
+  } else {
+    mat4.translate(mvMatrix, mvMatrix, [0, 0, -40]);
+    mat4.scale(
+      mvMatrix,
+      mvMatrix,
+      [scaleFactor[number].xFactor,scaleFactor[number].yFactor, scaleFactor[number].zFactor]
+    );
+    mat4.translate(
+      mvMatrix,
+      mvMatrix,
+      [transFactors[number].xFactor, transFactors[number].yFactor, transFactors[number].zFactor]
+    )
+  }
   mat4.multiply(mvMatrix,mvMatrix,canvasRotationMatrix)
   var shearMatrix = mat4.create();
   mat4.identity(shearMatrix);
@@ -389,7 +420,7 @@ function updateAttributesAndUniforms(selectedName, buffers, texture, number) {
     gl.vertexAttribPointer(outlineProgram.vertexPositionAttribute, buffers.position.itemSize, gl.FLOAT, false, 0, 0);
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normal);
     gl.vertexAttribPointer(outlineProgram.vertexNormalAttribute, buffers.normal.itemSize, gl.FLOAT, false, 0, 0)
-    gl.uniform1f(outlineProgram.offset, 0.4)
+    gl.uniform1f(outlineProgram.offset, 0.3)
     gl.uniform3fv(outlineProgram.outLineColor, vec3.fromValues(0.0,0.0,0.0))
     gl.uniformMatrix3fv(outlineProgram.nMatrixUniform, false, normalMatrix);
     gl.uniformMatrix4fv(outlineProgram.pMatrixUniform, false, pMatrix);
@@ -452,7 +483,7 @@ function updateAttributesAndUniforms(selectedName, buffers, texture, number) {
     Math.round(pickers.lightColorSpecular.rgb[1])/255,
     Math.round(pickers.lightColorSpecular.rgb[2])/255
   )
-  gl.uniform1f(selectedProgram.levels, 5)
+  gl.uniform1f(selectedProgram.levels, levels[number])
   //gl.uniform3f(selectedProgram.specular, 1, 1, 1 );
   var lightPositions = [];
   for (var i = 1; i <= 3; i++) {
@@ -554,6 +585,7 @@ async function animate() {
         animateSetting.yAngle += 0.03*animateSetting.ySpeed * elapsed;
         animateSetting.xAngle += 0.03*animateSetting.xSpeed * elapsed;
       }
+      cameraAngleRadians = (cameraAngleRadians >= 360) ? -360 : cameraAngleRadians+1*elapsed*0.03;
     }
     lastTime = timeNow;
 }
@@ -957,14 +989,81 @@ $(document).ready( function() {
       remainingSetteing = false
     }
   })
+  $('.checkbox.rotate-view').checkbox().checkbox({
+    onChecked: function() {
+      ifRotate = true
+    },
+    onUnchecked: function() {
+      ifRotate = false
+    }
+  })
   $('#shininess-range').range({
     min: 0,
     max: 600,
     start: 32,
     onChange: function(val) {
-      console.log(materialShininess)
       $('#shininess-value').text(val)
       materialShininess = val;
     }
   });
+  $('#levels-1').range({
+    min: 1,
+    max: 10,
+    start: 5,
+    onChange: function(val) {
+      $('#levels-1-value').text(val)
+      levels[0] = val;
+    }
+  });
+  $('#levels-2').range({
+    min: 1,
+    max: 10,
+    start: 5,
+    onChange: function(val) {
+      $('#levels-2-value').text(val)
+      levels[1] = val;
+    }
+  });
+  $('#levels-3').range({
+    min: 1,
+    max: 10,
+    start: 5,
+    onChange: function(val) {
+      $('#levels-3-value').text(val)
+      levels[2] = val;
+    }
+  });
+  $('#shadingSelect1').dropdown({
+    onChange: function(val) {
+      if(val=='cel-') {
+        $('.levels-1').show()
+      }
+      else {
+        $('.levels-1').hide()
+      }
+    }
+   });
+  $('#shadingSelect2').dropdown({
+    onChange: function(val) {
+      if(val=='cel-') {
+        $('.levels-2').show()
+      }
+      else {
+        $('.levels-2').hide()
+      }
+    }
+   });
+  $('#shadingSelect3').dropdown({
+    onChange: function(val) {
+      if(val=='cel-') {
+        $('.levels-3').show()
+      }
+      else {
+        $('.levels-3').hide()
+      }
+    }
+   });
+   $('.levels-1').hide()
+   $('.levels-2').hide()
+   $('.levels-3').hide()
 })
