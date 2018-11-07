@@ -28,6 +28,7 @@ $ python3 -m http.server 5000
 - `{}` for scaling
 - mouse for rotate
 - `enter` key for start/stop animate rotate
+- arrow key for animate rotation direction
 
 ### then?
 
