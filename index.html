@@ -380,6 +380,34 @@
         gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
     }
 </script>
+<script id="outline-fragmentShader" type="x-shader/x-fragment">
+  precision highp float;
+  uniform vec3 uOutLineColor;
+
+  void main(void) {
+      gl_FragColor = vec4(uOutLineColor, 1.0);
+  }
+</script>
+
+<script id="outline-vertexShader" type="x-shader/x-vertex">
+    precision highp float;
+
+    attribute vec3 aVertexPosition;
+    attribute vec3 aVertexNormal;
+    attribute vec2 aTextureCoord;
+    attribute vec3 aVertexFrontColor;
+
+    uniform mat3 uNMatrix;
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+    uniform float uOffset;
+
+    void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition + aVertexNormal * uOffset, 1.0);
+    }
+</script>
+
+
 <script id="cel-fragmentShader" type="x-shader/x-fragment">
   precision highp float;
   uniform mat3 uNMatrix;
@@ -395,6 +423,7 @@
   uniform sampler2D uSampler;
   uniform bool uIsLightShow[3];
   uniform bool uIfUseTexture;
+  uniform float levels;
 
   varying vec3 vVertexPosition;
   varying vec2 vTextureCoord;
@@ -403,7 +432,6 @@
 
 
   void main(void) {
-      float levels = 5.0;
       float scaleFactor = 1.0 / levels;
       vec3 eyeDirection = normalize(-vVertexPosition);
       vec3 pos = (uMVMatrix * vec4(vVertexPosition, 1.0)).xyz;
@@ -477,7 +505,7 @@
 
 
 <script id="sem-fragment-fragmentShader" type="x-shader/x-fragment">
-  precision mediump float;
+  precision highp float;
   uniform sampler2D uSampler;
   varying vec3 e;
   varying vec3 n;
@@ -491,8 +519,7 @@
   }
 </script>
 <script id="sem-fragment-vertexShader" type="x-shader/x-vertex">
-  precision mediump float;
-
+  precision highp float;
   attribute vec3 aVertexPosition;
   attribute vec3 aVertexNormal;
   attribute vec2 aTextureCoord;
@@ -514,7 +541,7 @@
 	}
 </script>
 <script id="sem-vertex-fragmentShader" type="x-shader/x-fragment">
-  precision mediump float;
+  precision highp float;
   uniform sampler2D uSampler;
 
 	varying vec2 vN;
@@ -526,8 +553,7 @@
   }
 </script>
 <script id="sem-vertex-vertexShader" type="x-shader/x-vertex">
-  precision mediump float;
-
+  precision highp float;
   attribute vec3 aVertexPosition;
   attribute vec3 aVertexNormal;
   attribute vec2 aTextureCoord;

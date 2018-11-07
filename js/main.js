@@ -274,6 +274,10 @@ function createLocations(selectedProgram) {
   selectedProgram.shininess = gl.getUniformLocation(selectedProgram, "uShininess")
   // for specify
   selectedProgram.ifUseTexture = gl.getUniformLocation(selectedProgram, "uIfUseTexture")
+  // for cel
+  selectedProgram.offset = gl.getUniformLocation(selectedProgram, "uOffset")
+  selectedProgram.outLineColor = gl.getUniformLocation(selectedProgram, "uOutLineColor")
+  selectedProgram.levels = gl.getUniformLocation(selectedProgram, "levels")
 }
 function createBuffers(loadedData) {
   var normalBuffer = gl.createBuffer();
@@ -359,9 +363,7 @@ function updateMVMatrix(number) {
   mat4.rotateX(mvMatrix, mvMatrix, degToRad(animateSetting.xAngle))
   mat4.rotateY(mvMatrix, mvMatrix, degToRad(animateSetting.yAngle));
 }
-function updateAttributesAndUniforms(selectdName, buffers, texture, number) {
-  var selectedProgram = shaders[selectdName];
-  gl.useProgram(selectedProgram);
+function updateAttributesAndUniforms(selectedName, buffers, texture, number) {
   if (!buffers ||
     buffers.position === null ||
     buffers.normal === null ||
@@ -371,12 +373,37 @@ function updateAttributesAndUniforms(selectdName, buffers, texture, number) {
     console.log(buffers)
     return;
   }
+  updateMVMatrix(number);
+  //課本6.8.3 N = (M^T)^(-1)
+  var normalMatrix = mat3.create()
+  mat3.fromMat4(normalMatrix,mvMatrix)
+  mat3.invert(normalMatrix,normalMatrix)
+  mat3.transpose(normalMatrix,normalMatrix);
+  //console.log(mvMatrix)
+  if (selectedName=='cel-') {
+    var outlineProgram = shaders['outline-']
+    gl.enable(gl.CULL_FACE);
+    gl.cullFace(gl.FRONT);
+    gl.useProgram(outlineProgram)
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
+    gl.vertexAttribPointer(outlineProgram.vertexPositionAttribute, buffers.position.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffers.normal);
+    gl.vertexAttribPointer(outlineProgram.vertexNormalAttribute, buffers.normal.itemSize, gl.FLOAT, false, 0, 0)
+    gl.uniform1f(outlineProgram.offset, 0.4)
+    gl.uniform3fv(outlineProgram.outLineColor, vec3.fromValues(0.0,0.0,0.0))
+    gl.uniformMatrix3fv(outlineProgram.nMatrixUniform, false, normalMatrix);
+    gl.uniformMatrix4fv(outlineProgram.pMatrixUniform, false, pMatrix);
+    gl.uniformMatrix4fv(outlineProgram.mvMatrixUniform, false, mvMatrix);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.index);
+    gl.drawElements(gl.TRIANGLES, buffers.index.numItems, gl.UNSIGNED_SHORT, 0);
+    gl.disable(gl.CULL_FACE);
+  }
+  var selectedProgram = shaders[selectedName];
+  gl.useProgram(selectedProgram);
   if (texture!==null) {
     gl.bindTexture(gl.TEXTURE_2D, texture);
   }
   gl.uniform1i(selectedProgram.samplerUniform, 0);
-  updateMVMatrix(number);
-  //console.log(mvMatrix)
 
   gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
   gl.vertexAttribPointer(selectedProgram.vertexPositionAttribute, buffers.position.itemSize, gl.FLOAT, false, 0, 0);
@@ -425,6 +452,7 @@ function updateAttributesAndUniforms(selectdName, buffers, texture, number) {
     Math.round(pickers.lightColorSpecular.rgb[1])/255,
     Math.round(pickers.lightColorSpecular.rgb[2])/255
   )
+  gl.uniform1f(selectedProgram.levels, 5)
   //gl.uniform3f(selectedProgram.specular, 1, 1, 1 );
   var lightPositions = [];
   for (var i = 1; i <= 3; i++) {
@@ -447,11 +475,6 @@ function updateAttributesAndUniforms(selectdName, buffers, texture, number) {
   // }
   gl.uniform1f(selectedProgram.shininess, parseFloat(materialShininess) );
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.index);
-  //課本6.8.3 N = (M^T)^(-1)
-  var normalMatrix = mat3.create()
-  mat3.fromMat4(normalMatrix,mvMatrix)
-  mat3.invert(normalMatrix,normalMatrix)
-  mat3.transpose(normalMatrix,normalMatrix);
   gl.uniformMatrix3fv(selectedProgram.nMatrixUniform, false, normalMatrix);
 
   gl.uniformMatrix4fv(selectedProgram.pMatrixUniform, false, pMatrix);
@@ -773,6 +796,7 @@ async function start_and() {
   shaders['sem-vertex-'] = await initShaders('sem-vertex-')
   shaders['sem-fragment-'] = await  initShaders('sem-fragment-')
   shaders['cel-'] = await initShaders('cel-')
+  shaders['outline-'] = await initShaders('outline-')
   shaders['blinn-phong-'] = await initShaders('blinn-phong-')
   then()
 }
