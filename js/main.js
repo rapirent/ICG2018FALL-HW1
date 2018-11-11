@@ -151,9 +151,6 @@ function initSetting() {
   $('#levels-1').range('set value', 5);
   $('#levels-2').range('set value', 5);
   $('#levels-3').range('set value', 5);
-  $('.levels-1').hide()
-  $('.levels-2').hide()
-  $('.levels-3').hide()
 }
 var remainingSetteing = false;
 function initGL(canvas) {
