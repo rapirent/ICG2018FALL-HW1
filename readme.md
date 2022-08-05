@@ -1,7 +1,4 @@
-# IICG2018FALL-HW1
-
-計算機圖學 - HW1
-
+# shader
 使用 WebGL 與 GLSL 實作各種著色法, 物體操縱與視角操作 (仿射變換)
 
 共實作七種著色法: `flat`, `gouraud`, `phong`, `blinn-phong`, `spherical enviorment(phong and gouraud)`, `cel`
